@@ -1,0 +1,47 @@
+GET http://localhost:5000/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJuYW1lIjoiRGl2eWEgQXNpdGEiLCJlbWFpbCI6IkFzaXRhQGdtYWlsLmNvbSIsImlhdCI6MTczNzA4ODYxNywiZXhwIjoxNzM3MDg4NjY3fQ._8YIsFomxhpzo0bbRdYgoE-UkdbJkljJRGqUt8EkQCM
+###
+POST http://localhost:5000/user
+Content-Type: application/json
+
+{
+  "name": "Anggie",
+  "email": "gie@gmail.com",
+  "phone_number": "081566765",
+  "password": "1234test"
+}
+
+
+###
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+  "email": "gie@gmail.com",
+  "password": "1234test"
+}
+
+### Update User Info (with Authorization Header)
+PUT http://localhost:5000/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJuYW1lIjoiRGl2eWEgQXNpdGEiLCJlbWFpbCI6IkFzaXRhQGdtYWlsLmNvbSIsImlhdCI6MTczNzA4ODYxNywiZXhwIjoxNzM3MDg4NjY3fQ._8YIsFomxhpzo0bbRdYgoE-UkdbJkljJRGqUt8EkQCM
+
+{
+  "name": "Anggie",
+  "email": "gie@gmail.com",
+  "phone_number": "08234567890",
+  "birth_date": "1990-01-01",
+  "gender": "Female",
+  "photo_profile": "https://example.com/photo.jpg"
+}
+
+
+
+
+###
+GET http://localhost:5000/token
+Content-Type: application/json
+
+###
+DELETE http://localhost:5000/logout
+Content-Type: application/json
