@@ -1,95 +1,130 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
 import NavbarComponent from '../components/NavbarComponent';
 import DeskripsiPageTourComponent from '../components/DeskripsiPageTourComponent';
 import GallaryPackgeTour from '../components/GallaryPackgeTourComponent';
 import FooterComponents from '../components/FooterComponents';
-import { motion } from 'framer-motion';
 
-// img Gallry
-// Impor gambar dari folder assets
-import image1 from "../assets/pure bike/Banner bali pure bike.jpg";
-import image2 from "../assets/pure bike/6N6A4762.jpg";
-import image3 from "../assets/pure bike/6N6A4940.jpg";
-import image4 from "../assets/pure bike/6N6A4919.jpg";
-import image5 from "../assets/pure bike/6N6A4910.jpg";
+const BASE_URL = 'http://localhost:5000'; // Sesuaikan dengan URL backend
 
-// Data untuk DeskripsiDestinasiComponents
-const deskripsiData = {
-  title: { first: "About Bali Pure", second: "Trek Bikes" },
-  about: "Experience the timeless charm of cycling through heritage-rich ancient villages, where every turn reveals stories from centuries past. Pedal through narrow alleys flanked by stone houses adorned with wooden shutters and vibrant flower boxes, pass under ancient archways, and discover hidden cultural treasures like centuries-old temples and secluded shrines. This journey is more than a ride—it's a deep dive into history. Taste traditional local cuisine, connect with communities, and witness fields and orchards tended by generations of farmers. It's a perfect escape from the modern rush, offering a glimpse into a world where the past and present coexist in harmony.Ready to embark on this unforgettable cycling adventure? Step into a world where time stands still and tradition thrives!",
-
-  program: [
-    "Cycling down village roads and rice fields",
-    "Visit to a traditional family house and temple in Penempahan village.",
-    "Enjoy a delicious lunch",
-  ],
-  facility: [
-    "2 tour guide provided",
-    "Free Bicycle",
-  ],
-  contact: [
-    "Guide: 0819-1833-4664",
-    "Admin: 0817-117-112",
-  ],
-  bookingLink: "#",
+const riseVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
-const images = [
-  { imgelink: image1 },
-  { imgelink: image2 },
-  { imgelink: image3 },
-  { imgelink: image4 },
-  { imgelink: image5 },
-];
-const tableHead = ["Time", "Description"];
-  const tableRows = [
-    { time: "9.00 – 9.30 AM", description: "Drive to our starting point. Our bicycle ride will then begin along back roads mostly downhill through villages and rice fields (approx 2 hours)." },
-    { time: "10.00 – 12.15 AM", description: "We will introduce you to traditional life and guide you into a family compound and temple at Penempahan village. (sarong will be provided) Along the way, you may stop for taking pictures or a short rest to soak in the views." },
-    { time: "12.00 – 14.00 PM", description: "Enjoy a lovely lunch and at the end of the trip, there is an opportunity to refresh in a swimming pool." },
-    { time: "12.00 – 14.00 PM", description: "Back To Hotel" },
-  ];
-
-
-  const priceTableRows = [
-    ["USD 80", "USD 65.33", "USD 58.67", " USD 52"], // Baris 1
-  ];
-
-  const riseVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
-  };
-
-
-
-
 
 const DetailBaliTrekBikes = () => {
-  return (
-    <div>
-        <NavbarComponent/>
-        <motion.div initial="hidden" animate="visible" variants={riseVariants}>
-        <GallaryPackgeTour images={images}/>
-        </motion.div>
-        <motion.div initial="hidden" animate="visible" variants={riseVariants}>
-        <div className="mt-6 md:mt-12 lg:mt-8 mx-auto px-4 text-center">
-          <h1 className="font-poppins text-customGreen text-lg md:text-xl font-semibold">
-          Bali Pure Bikes <span className='font-poppins text-customGreenslow font-semibold'>A Gentle Ride Into a Deeper Part of Bali</span>
-          </h1>
-          <h4 className="font-poppins text-customGreenslow mt-2 text-sm md:text-base">
-          Please read the tour package details in detail
-          </h4>
-        </div>
-        </motion.div>
-        <motion.div initial="hidden" animate="visible" variants={riseVariants}>
-        <DeskripsiPageTourComponent
-          {...deskripsiData}
-          tableHead={tableHead}
-          tableRows={tableRows}
-          priceTableRows={priceTableRows}
-        />
-        </motion.div>
-        <FooterComponents/>
-    </div>
-  )
-}
+  const [tourData, setTourData] = useState(null);
+  const [packageName, setPackageName] = useState("Paket Tidak Tersedia");
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [rundownData, setRundownData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default DetailBaliTrekBikes
+  useEffect(() => {
+    fetchTourData();
+  }, []);
+
+  const fetchTourData = async () => {
+    try {
+      const tourResponse = await axios.get(`${BASE_URL}/package-tour/24`); // Sesuaikan ID
+      const tour = tourResponse.data;
+
+      if (!tour) throw new Error("Data paket tour kosong!");
+
+      // Ambil package_name dari database
+      const fetchedPackageName = tour.package_name || "Paket Tidak Tersedia";
+      setPackageName(fetchedPackageName);
+      setTourData({
+        title: {
+          first: "About",
+          second: fetchedPackageName,
+        },
+        about: tour.about_package || "Deskripsi tidak tersedia.",
+        program: tour.program_tour?.split(". ") || [],
+        facility: tour.facility_tour?.split(". ") || [],
+        contact: tour.contact_pt?.split(". ") || [],
+        bookingLink: tour.booking_link || "/FromBookingpage",
+        priceTableRows: [
+          [
+            tour.price_2_person ? `$${tour.price_2_person.toFixed(2)}` : "-",
+            tour.price_3_5_person ? `$${tour.price_3_5_person.toFixed(2)}` : "-",
+            tour.price_6_10_person ? `$${tour.price_6_10_person.toFixed(2)}` : "-",
+            tour.price_11_person ? `$${tour.price_11_person.toFixed(2)}` : "-",
+          ],
+        ],
+      });
+
+      // Fetch gallery images
+      const galleryResponse = await axios.get(`${BASE_URL}/tour/gallery/24`);
+      setGalleryImages(
+        galleryResponse.data.map(img => ({ imgelink: `${BASE_URL}${img.img}` }))
+      );
+
+      // Fetch rundown
+      const rundownResponse = await axios.get(`${BASE_URL}/tour/rundown/24`);
+      setRundownData(
+        rundownResponse.data.map(item => ({
+          time: item.time || "Waktu tidak tersedia",
+          description: item.description || "Deskripsi tidak tersedia",
+        }))
+      );
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching tour details:", err);
+      setError("Gagal mengambil data paket tour.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div initial="hidden" animate="visible" variants={riseVariants}>
+      <NavbarComponent />
+
+      {loading ? (
+        <div className="flex items-center justify-center h-screen bg-white">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-customGreen border-t-transparent rounded-full animate-spin transition-all duration-500 ease-in-out"></div>
+            <p className="text-xl font-medium text-gray-700 animate-pulse font-poppins">Loading, please wait...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <motion.div initial="hidden" animate="visible" variants={riseVariants} transition={{ delay: 0.2 }}>
+            {galleryImages.length > 0 ? (
+              <GallaryPackgeTour images={galleryImages} />
+            ) : (
+              <p className="text-center text-gray-500">No images available</p>
+            )}
+          </motion.div>
+
+          {/* Bagian Title */}
+          <motion.div className="mt-6 md:mt-12 lg:mt-8 mx-auto px-4 text-center" variants={riseVariants}>
+            <h1 className="font-poppins text-customGreen text-lg md:text-xl font-semibold">
+              {packageName}{" "} <span className="font-poppins text-customGreenslow font-semibold">A Gentle Ride Into a Deeper Part of Bali</span>
+            </h1>
+            <h4 className="font-poppins text-customGreenslow mt-2 text-sm md:text-base">
+              Please read the tour package details in detail
+            </h4>
+          </motion.div>
+
+          <motion.div initial="hidden" animate="visible" variants={riseVariants} transition={{ delay: 0.6 }}>
+            <DeskripsiPageTourComponent
+              {...tourData}
+              tableHead={["Time", "Description"]}
+              tableRows={rundownData}
+              priceTableRows={tourData.priceTableRows}
+            />
+          </motion.div>
+
+          <motion.div initial="hidden" animate="visible" variants={riseVariants} transition={{ delay: 0.8 }}>
+            <FooterComponents />
+          </motion.div>
+        </>
+      )}
+    </motion.div>
+  );
+};
+
+export default DetailBaliTrekBikes;
