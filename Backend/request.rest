@@ -1,16 +1,24 @@
 GET http://localhost:5000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJuYW1lIjoiRGl2eWEgQXNpdGEiLCJlbWFpbCI6IkFzaXRhQGdtYWlsLmNvbSIsImlhdCI6MTczNzA4ODYxNywiZXhwIjoxNzM3MDg4NjY3fQ._8YIsFomxhpzo0bbRdYgoE-UkdbJkljJRGqUt8EkQCM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsIm5hbWUiOiJBbmdnaWUgUGVydGl3aSIsImVtYWlsIjoiZ2llQGdtYWlsLmNvbSIsImlhdCI6MTczNzg3MTA4OCwiZXhwIjoxNzM3ODcxMTM4fQ.iH7oZmBfpsZXxC4FqarkIwL4c-StGPVHLg_eXHwCgJQ
+# API user start
 ###
-POST http://localhost:5000/user
+POST http://localhost:5000/user-register
 Content-Type: application/json
 
 {
-  "name": "Anggie",
-  "email": "gie@gmail.com",
+  "name": "Tiara",
+  "email": "oryza@gmail.com",
   "phone_number": "081566765",
-  "password": "1234test"
+  "password": "1234445test"
 }
 
+###
+GET http://localhost:5000/get-card-destination/31
+Content-Type: application/json
+
+###
+GET http://localhost:5000/package-tour/10
+Content-Type: application/json
 
 ###
 POST http://localhost:5000/login
@@ -24,10 +32,10 @@ Content-Type: application/json
 ### Update User Info (with Authorization Header)
 PUT http://localhost:5000/update
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJuYW1lIjoiRGl2eWEgQXNpdGEiLCJlbWFpbCI6IkFzaXRhQGdtYWlsLmNvbSIsImlhdCI6MTczNzA4ODYxNywiZXhwIjoxNzM3MDg4NjY3fQ._8YIsFomxhpzo0bbRdYgoE-UkdbJkljJRGqUt8EkQCM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsIm5hbWUiOiJBbmdnaWUiLCJlbWFpbCI6ImdpZUBnbWFpbC5jb20iLCJwcm9maWxlUGljdHVyZSI6ImRlZmF1bHQuanBnIiwiaWF0IjoxNzM4MDU4NjM4LCJleHAiOjE3MzgwNTg2ODh9.1BarN4N5XkfcOvDGFCRiNY4SAvGrhSiSeeJumTdAYtQ
 
 {
-  "name": "Anggie",
+  "name": "Anggie Pertiwi ",
   "email": "gie@gmail.com",
   "phone_number": "08234567890",
   "birth_date": "1990-01-01",
@@ -45,3 +53,188 @@ Content-Type: application/json
 ###
 DELETE http://localhost:5000/logout
 Content-Type: application/json
+# API user end
+
+# Admin api start
+###
+POST http://localhost:5000/admin
+Content-Type: application/json
+
+{
+  "user_name": "Admin",
+  "password": "Admin12345"
+}
+
+# Admin api end
+
+
+
+#CODE API PACKAGE DAN CARD TOUR START
+
+###
+POST http://localhost:5000/package-tour
+Content-Type: application/json
+
+{
+  "package_name": "Bali Pure Trek Bikes",
+  "about_package": "Experience the timeless charm of cycling through heritage-rich ancient villages, where every turn reveals stories from centuries past. Pedal through narrow alleys flanked by stone houses adorned with wooden shutters and vibrant flower boxes, pass under ancient archways, and discover hidden cultural treasures like centuries-old temples and secluded shrines. This journey is more than a ride—it's a deep dive into history. Taste traditional local cuisine, connect with communities, and witness fields and orchards tended by generations of farmers. It's a perfect escape from the modern rush, offering a glimpse into a world where the past and present coexist in harmony. Ready to embark on this unforgettable cycling adventure? Step into a world where time stands still and tradition thrives!",
+
+  "program_tour": ["Cycling down village roads and rice fields,
+  Visit to a traditional family house and temple in Penempahan village,
+  Enjoy a delicious lunch."],
+
+  "price_2_person": 80,
+  "price_3_5_person": 65.33,
+  "price_6_10_person": 58.67,
+  "price_11_person": 52,
+
+  "facility_tour": ["2 tour guides provided, Free Bicycle"],
+
+  "contact_pt": "Guide: +62 819-1833-4664",
+
+  "Galeries": [
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4762.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4839.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4882.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4910.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4919.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4931.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4935.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4940.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/6N6A4972.jpg" },
+  { "image_url": "/gallery_bali_pure_trekbikes/Banner_bali_pure_bike.jpg" }
+],
+
+  "Rundown": [
+    {
+      "time": "09:00 - 09:30 AM",
+      "description": "Drive to our starting point. Our bicycle ride will then begin along back roads, mostly downhill, through villages and rice fields (approx 2 hours)."
+    },
+    {
+      "time": "10:00 - 12:15 AM",
+      "description": "We will introduce you to traditional life and guide you into a family compound and temple at Penempahan village (sarong will be provided). Along the way, you may stop for taking pictures or a short rest to soak in the views."
+    },
+    {
+      "time": "12:00 - 14:00 PM",
+      "description": "Enjoy a lovely lunch and, at the end of the trip, there is an opportunity to refresh in a swimming pool."
+    },
+    {
+      "time": "14:00 PM",
+      "description": "Back to the hotel."
+    }
+  ]
+}
+
+
+
+### UPdate paket tour
+PUT http://localhost:5000/package-tour-update/10
+Content-Type: application/json
+
+{
+  "package_name": "Bali Pure Tour",
+  "about_package": "The essence of Bali Pakerisan River Valley to the north of Ubud was listed as a Cultural Heritage Area by UNESCO in 2012. This mystical river valley contains ancient ancestral sites dating back to the 8th - 12th centuries. Ancient animist beliefs in Bali maintain that everything has a soul and spirit. As influences of Hinduism and Buddhism spread from India to Bali via Javanese kingdoms, gradually Hindu gods became manifested into the Balinese spirit belief and in the elements of nature. The religion of Bali was known as Agama Tirta - the religion of water. Agama Siwa Buddha is the blend of Shivaism and Buddhism along with the conceptions of the cosmos or universe. On this journey with Pure Bali Tour, learn about how these ancient belief systems unified. Also, learn about the complex irrigation system known in Bali as Subak. Dating back to the 9th century, water diverted from mountain sources to water-sharing communities ensures equal distribution to all. Subak reflects the Balinese outlook on life called Tri Hita Karana - a philosophy which maintains balance among the natural, physical, and spiritual worlds.",
+
+   "program_tour": ["Cycling down village roads and rice fields,
+  Visit to a traditional family house and temple in Penempahan village,
+  Enjoy a delicious lunch."],
+
+
+  "price_2_person": 80,
+  "price_3_5_person": 65.33,
+  "price_6_10_person": 58.67,
+  "price_11_person": 52,
+
+    "facility_tour": ["2 tour guides provided, Free Bicycle"],
+
+  "contact_pt": "Guide: +62 819-1833-4664. Admin: +62 817-117-112",
+
+  "Galeries": [
+    { "image_url": "/gallery_bali_pure_tour/pure tour-2.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-3.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-4.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-6.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-7.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-8.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-9.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour-10.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/pure tour.jpg" },
+    { "image_url": "/gallery_bali_pure_tour/Bannerpuretour.jpg" }
+  ],
+
+  "Rundown": [
+    {
+      "time": "08:00 - 09:30 AM",
+      "description": "The journey starts at the compound of Penempahan village leader (Bendesa) to enjoy a welcome drink and see the Lontar (contains of Balinese script about the meaning and layout of Balinese buildings according to Asta Kosala Kosali of Hindu) and see some “Topeng” (mask) which usually used if there’s any big ceremony in the village, also sharing about Bali history, village, Balinese compound and culture activities from old village leader inscriptions."
+    },
+    {
+      "time": "09:30 - 10:20 AM",
+      "description": "Visit Ancestral temples dating back to the 8th century which is one of the most mystical temples on the island. The Gumang Temple not only contains Hindu shrines but also Lingha and Yoni monuments. See the ceremonial sun-calendar which was used to measure the sacred days and examine the moon calendar, a mystical round stone with the complexion of the moon surface."
+    },
+    {
+      "time": "10:20 - 11:20 AM",
+      "description": "Continue to the nearby holy spring temple of Tirta Empul or Mengening Temple, where the locals purify their bodies and minds with its holy water. Learn about the importance of water and cleansing ceremonies in Hindu culture."
+    },
+    {
+      "time": "11:10 - 12:00 AM",
+      "description": "Conclude your temple explorations at the largest Buddhist stupa on Bali where Hindu and Buddhist iconography are combined in dedication to Hindu and Buddhist cosmology."
+    },
+    {
+      "time": "12:00 - 13:00 PM",
+      "description": "Enjoy a local-style Balinese lunch by the rice fields, it’s a beautiful place to have lunch. The family lunch was set up with a view to the rice paddy field with some vegetables, organic food, and Orient spice sauce with Balinese home cooking."
+    }
+  ]
+}
+
+
+
+
+
+###
+POST http://localhost:5000/card-tour
+Content-Type: application/json
+
+{
+  "package_name": "Bali Pure Tour",
+  "card_name": "Bali Pure Trek Bikes",
+  "about_card": "Cycling through ancient villages rich in cultural heritage offers a journey through time, where every street and building holds stories of the past..",
+  "location": "Place Penempahan Manukaya",
+  "price": 58.67,
+  "note_card": "Prices can change according to the number of tourist quotas"
+}
+
+###
+PUT http://localhost:5000/card-destination-update/8
+Content-Type: application/json
+
+{
+  "card_name": "Bali Pure Tour",
+  "about_card": "Updated about card details",
+  "price": 250,
+  "note_card": "Updated note for the card"
+}
+
+
+###
+DELETE http://localhost:5000/card-destination-dalate/95
+Content-Type: application/json
+
+#CODE API PACKAGE DAN CARD TOUR START
+
+
+#CODE API Booking START
+
+###
+POST http://localhost:5000/booking
+Content-Type: application/json
+
+{
+  "id_user": 2,
+  "package_name": "Bali Pure Trek Bikes",
+  "people_join": 5,
+  "booking_date": "2024-12-25"
+}
+
+
+
+#CODE API Booking END

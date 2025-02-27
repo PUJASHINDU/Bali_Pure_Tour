@@ -6,50 +6,43 @@ dotenv.config();
 
 export const refreshToken = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken; // Ambil refresh token dari cookie
     if (!refreshToken) {
-      return res.sendStatus(401);
+      return res.sendStatus(401); // Unauthorized
     }
 
+    // Cari user berdasarkan refresh token
     const user = await User.findOne({
       where: {
-        refresh_token: refreshToken
-      }
+        refresh_token: refreshToken,
+      },
     });
     if (!user) {
-      return res.sendStatus(403);
+      return res.sendStatus(403); // Forbidden
     }
 
-    console.log("User found:", user.dataValues);
-
+    // Verifikasi refresh token
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
       if (err) {
         console.error("JWT verification error:", err.message);
-        return res.sendStatus(403);
+        return res.sendStatus(403); // Forbidden
       }
-
-      console.log("JWT successfully verified. Decoded payload:", decoded);
 
       const userId = user.id;
       const name = user.name;
       const email = user.email;
 
-      const secretKey = process.env.ACCSESS_TOKEN_SECRET || "fallback_secret_key";
-      if (!secretKey) {
-        console.error("Access token secret is undefined!");
-        return res.sendStatus(500);
-      }
-
+      // Buat access token baru
       const accessToken = jwt.sign(
         { userId, name, email },
-        secretKey,
-        { expiresIn: "50s" }
+        process.env.ACCSESS_TOKEN_SECRET,
+        { expiresIn: "15m" } // Access token hanya berlaku 15 menit
       );
-      console.log("Access token generated successfully:", accessToken);
-      res.json({ accessToken });
+
+      res.json({ accessToken }); // Kirimkan access token baru
     });
   } catch (error) {
     console.error("Unexpected error:", error);
-    res.sendStatus(500);
+    res.sendStatus(500); // Internal Server Error
   }
 };
