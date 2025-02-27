@@ -44,7 +44,7 @@ export const Register = async (req, res) => {
   }
 };
 
-// Login dan Generate Token
+
 export const Login = async (req, res) => {
   try {
     const user = await User.findAll({
@@ -52,33 +52,47 @@ export const Login = async (req, res) => {
         email: req.body.email
       }
     });
+
     const match = await bcrypt.compare(req.body.password, user[0].password);
-    if(!match) return res.status(400).json({msg: "worg password"});
+    if (!match) return res.status(400).json({ msg: "Wrong password" });
+
     const userId = user[0].id;
     const name = user[0].name;
     const email = user[0].email;
-    const accessToken = jwt.sign({userId, name, email}, process.env.ACCSESS_TOKEN_SECRET,{
+    const profilePicture = user[0].profilePicture || 'default.jpg';
+
+    const accessToken = jwt.sign({ userId, name, email, profilePicture }, process.env.ACCSESS_TOKEN_SECRET, {
       expiresIn: '50s'
     });
-    const refreshToken = jwt.sign({userId, name, email}, process.env.REFRESH_TOKEN_SECRET,{
+
+    const refreshToken = jwt.sign({ userId, name, email, profilePicture }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: '1d'
     });
-    await User.update({refresh_token: refreshToken}, {
-      where:{
-        id: userId
-      }
-    });
+
+    await User.update({ refresh_token: refreshToken }, { where: { id: userId } });
+
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      secure: false  // nonaktifkan secure untuk HTTP di lokal
+      httpOnly: true,  // Menghindari akses cookie di JS
+      secure: process.env.NODE_ENV === 'production',  // Gunakan HTTPS di production
+      maxAge: 24 * 60 * 60 * 1000,  // Cookie berlaku selama 1 hari
+      sameSite: 'Strict',  // SameSite mengontrol akses antar domain
     });
 
-    res.json({ accessToken });
+    // Kembalikan accessToken dan data pengguna dalam respons
+    res.json({
+      accessToken,
+      user: {
+        id: userId,
+        name,
+        email,
+        profilePicture
+      }
+    });
   } catch (error) {
-      res.status(404).json({msg:"Email Tidak Terdaftar"})
+    res.status(404).json({ msg: "Email Tidak Terdaftar" });
   }
-}
+};
+
 
 
 export const Logout = async (req, res) => {
@@ -119,40 +133,49 @@ export const Logout = async (req, res) => {
   }
 };
 
+
+
 export const UpdateUser = async (req, res) => {
-  const { name, email, phone_number, birth_date, gender, photo_profile } = req.body;
-
   try {
-    // Cari user berdasarkan ID yang ada di token
-    const user = await User.findOne({
-      where: {
-        id: req.userId,
-      },
-    });
-    console.log("Received User ID:", req.userId);
-    // Jika user tidak ditemukan, kirim status 404
-    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.sendStatus(401); // Token tidak ada
+    }
 
-    // Update data user
-    await User.update(
-      {
-        name,
-        email,
-        phone_number,
-        birth_date,
-        gender,
-        photo_profile,
-      },
-      {
-        where: {
-          id: req.userId,
-        },
+    const user = await User.findOne({ where: { refresh_token: refreshToken } });
+    if (!user) {
+      return res.sendStatus(403); // Pengguna tidak ditemukan
+    }
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.sendStatus(403); // Token tidak valid
       }
-    );
 
-    res.json({ msg: "User berhasil diperbarui" });
+      // Ambil data dari body request
+      const { name, email, phone_number, birth_date, gender, photo_profile } = req.body;
+
+      // Update data pengguna di database
+      await User.update(
+        { name, email, phone_number, birth_date, gender, photo_profile },
+        { where: { id: user.id } }
+      );
+
+      // Buat akses token baru dengan data terbaru
+      const accessToken = jwt.sign(
+        { userId: user.id, name, email, phone_number, birth_date, gender, photo_profile },
+        process.env.ACCSESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
+
+      // Kirim response dengan access token baru
+      res.json({
+        message: "Profile updated successfully",
+        accessToken,
+      });
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+    console.error("Error updating profile:", error);
+    res.sendStatus(500); // Internal server error
   }
 };
