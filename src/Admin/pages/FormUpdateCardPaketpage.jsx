@@ -1,5 +1,7 @@
 import React from 'react'
 import FormUpdateCardPaket from '../components/FormUpdateCardPaket'
+import NavbarComponent from '../../components/NavbarComponent'
+import FooterComponents from '../../components/FooterComponents';
 
 // Data untuk DeskripsiDestinasiComponents
 const deskripsiData = {
@@ -16,7 +18,9 @@ const deskripsiData = {
 const FormUpdateCardPaketpage = () => {
   return (
     <div>
+      <NavbarComponent/>
       <FormUpdateCardPaket {...deskripsiData}/>
+      <FooterComponents />
     </div>
   )
 }

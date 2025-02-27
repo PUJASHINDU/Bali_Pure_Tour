@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { Spinner } from "@material-tailwind/react"; // Import Spinner
+import { Spinner } from "@material-tailwind/react";
+import { useAuth } from '../Context/AuthContext'; // Import AuthContext
 import {
   Card,
   Input,
@@ -13,11 +14,12 @@ import { Link } from 'react-router-dom';
 
 const LoginComponents = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Ambil fungsi login dari AuthContext
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
-  const [loading, setLoading] = useState(false);  // State loading
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -28,31 +30,57 @@ const LoginComponents = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);  // Set loading to true
+    setLoading(true);
     try {
-      // Simulate login logic
-      Swal.fire({
-        title: "Good job!",
-        text: "Login successful!",
-        icon: "success",
-        confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate('/');  // Redirect ke halaman home setelah pengguna mengklik OK
-        }
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        mode: 'cors',
+        credentials: 'include',  // Pastikan cookies dikirimkan
       });
+
+      const result = await response.json();
+      if (response.ok) {
+        const { accessToken } = result;
+        if (accessToken) {
+          localStorage.setItem('accessToken', accessToken);
+
+          // Ambil data pengguna menggunakan accessToken
+          const userResponse = await fetch('http://localhost:5000/user', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${accessToken}` // Kirim token di header
+            },
+            mode: 'cors'
+          });
+
+          const userData = await userResponse.json();
+          login(accessToken, userData); // Simpan data pengguna di context
+          Swal.fire({
+            title: "Success!",
+            text: "Login successful!",
+            icon: "success",
+            confirmButtonText: 'OK'
+          }).then(() => navigate('/'));
+        } else {
+          throw new Error('Invalid response from server');
+        }
+      } else {
+        throw new Error(result.msg || 'Login failed');
+      }
     } catch (error) {
-      console.error('Login Failed:', error);
       Swal.fire({
         title: "Oops!",
-        text: "Login failed. Please check your credentials.",
+        text: error.message,
         icon: "error",
         confirmButtonText: 'OK'
       });
     } finally {
-      setLoading(false);  // Set loading to false setelah proses selesai
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="relative flex justify-center items-center min-h-screen">
@@ -63,35 +91,32 @@ const LoginComponents = () => {
       )}
       <Card color="transparent" shadow={false} className={`w-4/5 max-w-4xl mt-9 ${loading ? 'blur-sm' : ''}`}>
         <Typography variant="h4" color="blue-gray" className="text-center font-poppins text-customGreen font-semibold">
-            WELCOME BACK USER 👋
+          WELCOME BACK USER 👋
         </Typography>
         <Typography variant="h6" color="blue-gray" className="text-center text-sm -ml-4 font-poppins text-customGreenslow mt-2">
-            Login Here
+          Login Here
         </Typography>
         <Typography color="gray" className="mt-1 font-normal text-center font-poppins text-customGreenslow">
-          Enter your valid personal details
-          we protect your data
+          Enter your valid personal details, we protect your data
         </Typography>
         <form className="mt-8 mb-2" onSubmit={handleSubmit}>
           <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
-              <Typography variant="h6"  className="text-customGreenslow mb-2 font-poppins">
-                Your Username
+              <Typography variant="h6" className="text-customGreenslow mb-2 font-poppins">
+                Your Email
               </Typography>
               <Input
                 size="lg"
-                placeholder="Username"
-                name="username"
-                value={formData.username}
+                placeholder="Email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-                labelProps={{
-                  className: "before:content-none after:content-none",
-                }}
+                labelProps={{ className: "before:content-none after:content-none" }}
               />
             </div>
             <div>
-              <Typography variant="h6"  className="text-customGreenslow mb-2 font-poppins">
+              <Typography variant="h6" className="text-customGreenslow mb-2 font-poppins">
                 Password
               </Typography>
               <Input
@@ -102,42 +127,27 @@ const LoginComponents = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-                labelProps={{
-                  className: "before:content-none after:content-none",
-                }}
+                labelProps={{ className: "before:content-none after:content-none" }}
               />
             </div>
           </div>
           <Checkbox
             label={
-              <Typography
-                variant="small"
-                color="gray"
-                className="flex items-center font-normal font-poppins"
-              >
+              <Typography variant="small" color="gray" className="flex items-center font-normal font-poppins">
                 I agree to the
-                <a
-                  href="#"
-                  className="font-medium transition-colors hover:text-gray-900 fontbg-customGreen"
-                >
-                  &nbsp;Terms and Conditions
-                </a>
+                <a href="#" className="font-medium transition-colors hover:text-gray-900 fontbg-customGreen"> &nbsp;Terms and Conditions</a>
               </Typography>
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-
           <div className="flex justify-center mt-6">
             <Button className="w-[40%] font-poppins text-lg bg-customGreen" type="submit">
               Login
             </Button>
           </div>
           <Typography color="gray" className="mt-4 text-center font-normal font-poppins">
-          Hey users, don't you have an account yet?
-          If not, click{" "}
-          <Link to="/Singinpage" className=" text-customGreen font-poppins font-semibold">
-              Sign Up
-          </Link>
+            Hey users, don't you have an account yet? If not, click
+            <Link to="/Singinpage" className=" text-customGreen font-poppins font-semibold"> Sign Up</Link>
           </Typography>
         </form>
       </Card>

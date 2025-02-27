@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardBody,
@@ -17,6 +18,16 @@ const DeskripsiPageTourComponent = ({
   contact,
   bookingLink,
 }) => {
+  const navigate = useNavigate();
+  const handleBooking = () => {
+    navigate("/FromBookingpage", {
+      state: {
+        packageName: title.second,
+        priceTableRows: priceTableRows,
+      },
+    });
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen px-4 mb-10 mt-7 overflow-hidden">
       <Card className="w-full max-w-screen-lg">
@@ -147,7 +158,7 @@ const DeskripsiPageTourComponent = ({
           {/*contact*/}
           <Typography className="font-poppins text-justify mb-2 mt-4 text-xl">
             <h1 className="text-customGreen font-semibold">
-             Contact <span className="text-customGreenslow font-semibold">Bali Pure Tour</span>
+             Contact <span className="text-customGreenslow font-semibold">PT Bali Pure Tour</span>
             </h1>
           </Typography>
           <Typography className="font-poppins text-justify mb-2">
@@ -162,7 +173,7 @@ const DeskripsiPageTourComponent = ({
         {/* Booking Button */}
         <CardFooter className="pt-0">
           <a href={bookingLink} className="inline-block">
-            <Button
+            <Button onClick={handleBooking}
               size="lg"
               variant="text"
               className="flex items-center gap-2 font-semibold font-poppins bg-customGreen text-white"

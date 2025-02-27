@@ -9,15 +9,15 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 
 const SinginComponent = () => {
   const navigate = useNavigate();  // Initialize useNavigate
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
+    name: '',
     email: '',
-    phone: ''
+    phone_number: '',
+    password: ''
   });
   const [loading, setLoading] = useState(false);  // State loading
 
@@ -32,17 +32,27 @@ const SinginComponent = () => {
     e.preventDefault();
     setLoading(true);  // Set loading to true
     try {
-      // Simulate registration logic
-      Swal.fire({
-        title: "Good job!",
-        text: "Registration successful!",
-        icon: "success",
-        confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate('/Loginpage');  // Redirect ke halaman login setelah pengguna mengklik OK
-        }
+      const response = await fetch('http://localhost:5000/user-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        mode: 'cors'  // Pastikan mode ini diatur
       });
+
+      if (response.ok) {
+        Swal.fire({
+          title: "Good job!",
+          text: "Registration successful!",
+          icon: "success",
+          confirmButtonText: 'OK'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate('/Loginpage');  // Redirect ke halaman login setelah pengguna mengklik OK
+          }
+        });
+      } else {
+        throw new Error('Registration failed');
+      }
     } catch (error) {
       console.error('Registration Failed:', error);
       Swal.fire({
@@ -78,13 +88,13 @@ const SinginComponent = () => {
           <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
               <Typography variant="h6"  className=" text-customGreenslow mb-2 font-poppins">
-                Username
+                Name
               </Typography>
               <Input
                 size="lg"
-                placeholder="Username"
-                name="username"
-                value={formData.username}
+                placeholder="Name"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
@@ -92,7 +102,6 @@ const SinginComponent = () => {
                 }}
               />
             </div>
-
             <div>
               <Typography variant="h6"  className=" text-customGreenslow mb-2 font-poppins">
                 Your Email
@@ -116,8 +125,8 @@ const SinginComponent = () => {
               <Input
                 size="lg"
                 placeholder="Phone Number"
-                name="phone"
-                value={formData.phone}
+                name="phone_number"
+                value={formData.phone_number}
                 onChange={handleChange}
                 className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
@@ -166,13 +175,6 @@ const SinginComponent = () => {
               Sign Up
             </Button>
           </div>
-          <Typography color="gray" className="mt-4 text-center font-normal font-poppins">
-            Hey users, do you have an account?
-            If you have clicked{" "}
-            <Link to="/Loginpage" className="text-customGreen font-poppins font-semibold">
-              Login
-            </Link>
-          </Typography>
         </form>
       </Card>
     </div>

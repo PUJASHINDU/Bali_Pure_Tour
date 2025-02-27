@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from "axios";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -10,96 +12,29 @@ import {
 } from "@material-tailwind/react";
 
 // Import local images and icons
-import img1 from '../assets/pure tour/Bannerpuretour.jpg';
-import img2 from '../assets/pure cook/home-10.jpg';
-import img3 from '../assets/Pure Trek/6N6A5401.jpg';
-import img4 from '../assets/pure bike/6N6A4762.jpg'
 import user from '../assets/icon/user.png';
 import coin from '../assets/icon/coin.png';
 import view from '../assets/icon/view.png';
 import guide from '../assets/icon/guide.png';
 
-const cardData = [
-  {
-    imageUrl: img1,
-    title: { first: "BALI PURE", second: "TOUR" },
-    description: "The tour visits a sacred temple with religious nuances in a beautiful and ancient village, namely Manukaya village",
-    Note: "Note: Prices can change according to the number of tourist quotas",
-    location:"Place Penempahan Manukaya",
-    price: "58.67 USD",
-    tooltips: [
-      "Maximal 6 Person",
-      "2 Guide",
-      "View Details",
-    ],
-    detailPage: "/DetailBaliPureTour",
-  },
-  {
-    imageUrl: img2,
-    title: { first: "BALI PURE", second: "COOK" },
-    description: "Authentic balinese cooking Experience the rich tapestry of Balinese culture through its vibrant cuisine with a Balinese cooking",
-    Note: "Note: Prices can change according to the number of tourist quotas",
-    location:"Place Penempahan Manukaya",
-    price: "43.33 USD",
-    tooltips: [
-      "Maximal 15 Person",
-      "2 Guide",
-      "View Details",
-
-    ],
-    detailPage: "/DetailBaliCook",
-  },
-  {
-    imageUrl: img3,
-    title: { first: "BALI PURE", second: "TREK" },
-    description: "The track Balinese Ancient Village Structure Join us to explore more about Ancient Village Structures and gain new experiences in Bali.",
-    location:"Place Penempahan Manukaya",
-    Note: "Note: Prices can change according to the number of tourist quotas",
-    location:"Place Penempahan Manukaya",
-    price: "USD 58.67",
-    tooltips: [
-      "Maximal 5 Person",
-      "2 Guide",
-      "View Details",
-    ],
-    detailPage: "/DetailBaliTreek",
-  },
-  {
-    imageUrl: img4,
-    title: { first: "BALI PURE", second: "TREK BIKES" },
-    description: "Cycling through ancient villages rich in cultural heritage offers a journey through time, where every street and building holds stories.",
-    location:"Place Penempahan Manukaya",
-    Note: "Note: Prices can change according to the number of tourist quotas",
-    location:"Place Penempahan Manukaya",
-    price: "USD 80",
-    tooltips: [
-      "Maximal 5 Person",
-      "2 Guide",
-      "View Details",
-    ],
-    detailPage: "/DetailBaliTrekBikes",
-  },
-];
-
-const CardComponent = ({ imageUrl, title, rating, location, description, Note, price, tooltips, detailPage }) => {
+const CardComponent = ({ imageUrl, title, location, description, Note, price, tooltips, detailPage }) => {
   return (
     <Card className="w-full max-w-[26rem] shadow-lg mt-10">
       <CardHeader floated={false} color="blue-gray">
-        <img src={imageUrl} alt={title} />
+        <img src={imageUrl} alt={title.second} />
         <div className="absolute inset-0 h-full w-full bg-gradient-to-tr from-transparent via-transparent to-black/60" />
       </CardHeader>
 
       <CardBody>
         <div className="mb-2 flex items-center justify-between">
-           <Typography variant="h4" className="mb-2 font-semibold text-xl font-poppins">
-              <span className="text-customGreen">{title.first}</span>{" "}
-              <span className="text-customGreenslow">{title.second}</span>
-            </Typography>
+          <Typography variant="h4" className="mb-2 font-semibold text-xl font-poppins">
+            <span className="text-customGreen">{title.first}</span>{" "}
+            <span className="text-customGreenslow">{title.second}</span>
+          </Typography>
           <div className="flex items-center gap-1.5">
-            <Typography
-              className="flex items-center gap-1.5 font-medium font-poppins text-customGreenslow -mt-2" >
+            <Typography className="flex items-center gap-1.5 font-medium font-poppins text-customGreenslow -mt-2">
               <img src={coin} alt="" />
-              {price}
+              {price} USD
             </Typography>
           </div>
         </div>
@@ -116,10 +51,10 @@ const CardComponent = ({ imageUrl, title, rating, location, description, Note, p
           {tooltips.map((tooltipContent, index) => (
             index === 2 ? (
               <Tooltip key={index} content={tooltipContent}>
-                <a href={detailPage} className="cursor-pointer border rounded-full border-gray-900/5 bg-gray-900/5 p-3 text-gray-900 transition-colors hover:border-gray-900/10 hover:bg-gray-900/10
+                <Link to={detailPage} className="cursor-pointer border rounded-full border-gray-900/5 bg-gray-900/5 p-3 text-gray-900 transition-colors hover:border-gray-900/10 hover:bg-gray-900/10
                                                 hover:!opacity-100 group-hover:opacity-70">
                   <img src={view} alt={`Icon ${index + 1}`} className="h-5 w-5" />
-                </a>
+                </Link>
               </Tooltip>
             ) : (
               <Tooltip key={index} content={tooltipContent}>
@@ -150,10 +85,48 @@ const CardComponent = ({ imageUrl, title, rating, location, description, Note, p
 };
 
 const AllPackgeTourComponent = () => {
+
+  const [tours, setTours] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/get-card-destinations")
+      .then(async (response) => {
+        let destinations = response.data;
+
+        // Ambil data gambar dari API
+        const imagesResponse = await axios.get("http://localhost:5000/get-gallery-images");
+        const imagesData = imagesResponse.data;
+
+        // Susun data agar langsung bisa mengarah ke halaman detail berdasarkan ID
+        let formattedData = destinations.map((item) => {
+          const matchedImage = imagesData.find((img) => Number(img.id_package) === Number(item.id_package));
+
+          return {
+            id: item.id_package, // Tambahkan ID untuk routing
+            imageUrl: matchedImage ? matchedImage.img : "https://via.placeholder.com/400",
+            title: { first: "", second: item.card_name.toUpperCase() },
+            description: item.about_card,
+            location: "Place Penempahan Manukaya",
+            Note: item.note_card,
+            price: `${item.price}`,
+            tooltips: ["Maximal 6 Person", "2 Guide", "View Details"],
+            detailPage: `/detail/${item.id_package}` // Buat link dinamis
+          };
+        });
+
+        setTours(formattedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching card destinations:", error);
+      });
+  }, []);
+
+
   return (
     <div className="flex flex-col items-center">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {cardData.map((data, index) => (
+        {tours.map((data, index) => (
           <CardComponent key={index} {...data} />
         ))}
       </div>
