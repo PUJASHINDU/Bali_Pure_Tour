@@ -6,7 +6,7 @@ export const createBooking = async (req, res) => {
   try {
     console.log("🔍 User dari Token:", req.user); // Debug user dari token
 
-    const { full_name, email, phone_number, id_package, num_participants, checkin_date, price } = req.body;
+    const { full_name, email, phone_number, id_package, package_name, num_participants, checkin_date, price } = req.body;
     const user_id = req.user?.id; // Gunakan req.user.id
 
     if (!user_id) {
@@ -27,6 +27,7 @@ export const createBooking = async (req, res) => {
       email,
       phone_number,
       id_package,
+      package_name,
       num_participants,
       checkin_date: formattedDate,
       price,
