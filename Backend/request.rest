@@ -6,10 +6,10 @@ POST http://localhost:5000/user-register
 Content-Type: application/json
 
 {
-  "name": "Tiara",
+  "name": "Ara",
   "email": "oryza@gmail.com",
   "phone_number": "081566765",
-  "password": "1234445test"
+  "password": "1234"
 }
 
 ###
@@ -25,8 +25,8 @@ POST http://localhost:5000/login
 Content-Type: application/json
 
 {
-  "email": "gie@gmail.com",
-  "password": "1234test"
+  "email": "Yoga@gamil.com",
+  "password": "Yoga1234"
 }
 
 ### Update User Info (with Authorization Header)
@@ -225,14 +225,36 @@ Content-Type: application/json
 #CODE API Booking START
 
 ###
-POST http://localhost:5000/booking
+### Test Booking API
+POST http://localhost:5000/booking-tour
 Content-Type: application/json
 
 {
-  "id_user": 2,
-  "package_name": "Bali Pure Trek Bikes",
-  "people_join": 5,
-  "booking_date": "2024-12-25"
+  "fullName": "Jane Doe",
+  "email": "jane@example.com",
+  "phone": "081234567890",
+  "packageName": "Bali Trek Adventure",
+  "numParticipants": 3,
+  "checkin": "2025-03-05"
+}
+
+###
+GET http://localhost:5000/getUserBooking
+Content-Type: application/json
+
+### Update User Info (with Authorization Header)
+POST http://localhost:5000/booking-tour
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJuYW1lIjoiWW9nYSIsImVtYWlsIjoiWW9nYUBnYW1pbC5jb20iLCJpYXQiOjE3NDA5Njg2MzQsImV4cCI6MTc0MDk2OTUzNH0.t__zN7X0WnHp2dNGjkWMrlFbFY6NcUv0HcdaJKsLyTQ
+
+{
+    "full_name": "Astawa",
+    "email": "pujaAstawa@gmail.com",
+    "phone_number": "081433232",
+    "id_package": 68,
+    "num_participants": 2,
+    "checkin_date": "2024-03-10",
+    "price": 1000000
 }
 
 
