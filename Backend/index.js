@@ -4,16 +4,36 @@ import db from "./config/Database.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import router from "./routes/index.js";
+
 import path from "path";
 import fs from "fs";
 import multer from "multer";
 import { fileURLToPath } from "url";
+// import Booking from "./models/BookingModel.js";
 
 // Dapatkan direktori saat ini
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// try {
+//   await db.authenticate();
+//   console.log('Database Connceted......');
+//   await Transaction.sync();
+// } catch (error) {
+
+// }
+
+// try {
+//   await db.authenticate();
+//   console.log("Database Connected......");
+//   await Booking.sync({ alter: true }); // Sync dengan perubahan struktur
+//   console.log("Booking table updated!");
+// } catch (error) {
+//   console.error("Error updating database:", error);
+// }
+
 
 const app = express();
 
