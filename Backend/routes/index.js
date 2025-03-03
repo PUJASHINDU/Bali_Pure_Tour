@@ -9,6 +9,8 @@ import { createCardDestination, updateCardDestination, deleteCardDestinationWith
 import { getAllCardDestinations } from "../controllers/CardDestination.js";
 import { getGalleryImages } from "../controllers/CardDestination.js";
 import { uploadGalleryImages, updateGalleryImages  } from "../controllers/Galeries.js";
+import { createBooking , getUserBookings } from "../controllers/Booking.js";
+import { authenticateUser } from "../middleware/authenticateUser.js"; // Pastikan import
 
 
 
@@ -17,12 +19,19 @@ import { uploadGalleryImages, updateGalleryImages  } from "../controllers/Galeri
 
 // import { refreshToken } from "../controllers/RefreshToken.js";
 
-import { createBooking } from "../controllers/Booking.js";
 
 const router = express.Router();
 // router.get("/token", refreshToken);
 //Admin
 router.post("/admin", LoginAdmin);
+
+router.post('/booking-tour', verifyToken, createBooking, async (req, res) => {
+  console.log("Token diterima:", req.headers.authorization);
+  console.log("Payload booking:", req.body);
+});
+router.get("/getUserBooking", authenticateUser, getUserBookings);
+
+
 
 // Get paket-tour
 router.get("/get-packages", getAllPackageTours)
@@ -63,8 +72,6 @@ router.get("/package-tour/:id", getTourById);
 router.get("/tour/gallery/:id", getTourGallery);
 router.get("/tour/rundown/:id", getTourRundown);
 
-// Endpoint untuk menangani pembuatan booking dan pengambilan data user sekaligus
-router.post("/booking", createBooking);
 
 router.get('/user', verifyToken, getUser);
 router.post('/user-register', Register);
