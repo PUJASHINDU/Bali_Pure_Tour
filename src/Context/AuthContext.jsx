@@ -3,120 +3,169 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
-  const [user, setUser] = useState(null); // Pastikan setUser berasal dari useState
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [loading, setLoading] = useState(true); // Hindari flash logout saat refresh
 
-  // Fungsi untuk refresh access token
+  // 🔄 Fungsi refresh token otomatis
   const refreshAccessToken = async () => {
     try {
+      console.log("🔄 Mencoba refresh token...");
+
       const response = await fetch("http://localhost:5000/token", {
         method: "GET",
-        credentials: "include", // Kirim cookie bersama permintaan
+        credentials: "include", // Pastikan cookie dikirim
       });
 
+      console.log("🛠 Status Response:", response.status);
+
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error("🚨 Error response dari server:", errorData);
         throw new Error("Failed to refresh token");
       }
 
       const data = await response.json();
+      console.log("✅ Token berhasil diperbarui:", data.accessToken);
       setToken(data.accessToken);
+      localStorage.setItem("token", data.accessToken);
 
-      // Ambil data user
       const userData = await fetchUserData(data.accessToken);
       setUser(userData);
 
       return data.accessToken;
     } catch (error) {
-      console.error("Gagal refresh token:", error);
+      console.error("❌ Gagal refresh token:", error);
       logout();
+      return null;
     }
   };
 
-  // Fungsi untuk mengambil data user
+
+  // 👤 Ambil data user dengan auto-refresh token jika expired
   const fetchUserData = async (accessToken) => {
     try {
+      let currentToken = accessToken || token;
+
       const response = await fetch("http://localhost:5000/user", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${currentToken}`,
         },
       });
+
+      if (response.status === 403) {
+        console.warn("⚠️ Token expired, mencoba refresh...");
+        currentToken = await refreshAccessToken();
+        if (!currentToken) return null; // Gagal refresh token
+
+        // Coba lagi fetch user data
+        const retryResponse = await fetch("http://localhost:5000/user", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${currentToken}`,
+          },
+        });
+
+        if (!retryResponse.ok) {
+          throw new Error("Gagal mengambil data user setelah refresh token");
+        }
+
+        return await retryResponse.json();
+      }
 
       if (!response.ok) {
         throw new Error("Failed to fetch user data");
       }
 
-      const data = await response.json();
-      return data; // Return data user
+      return await response.json();
     } catch (error) {
-      console.error("Gagal mengambil data user:", error);
+      console.error("❌ Gagal mengambil data user:", error);
+      return null;
     }
   };
 
-   // Fungsi untuk update profile
-   const UpdateUser = async (profileData) => {
+  // 🔄 Fungsi untuk update profile user
+  const UpdateUser = async (profileData) => {
     try {
       let currentToken = token;
 
-      // Cek apakah token sudah kedaluwarsa atau tidak valid
       if (!currentToken) {
-        console.log("Token expired, refreshing...");
-        currentToken = await refreshAccessToken(); // Refresh token jika token kosong
+        console.log("⚠️ Token expired, mencoba refresh...");
+        currentToken = await refreshAccessToken();
+        if (!currentToken) return;
       }
 
-      const response = await fetch('http://localhost:5000/update', {
-        method: 'PUT',
+      const response = await fetch("http://localhost:5000/update", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentToken}`, // Gunakan token yang baru atau masih valid
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentToken}`,
         },
         body: JSON.stringify(profileData),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        throw new Error("Failed to update profile");
       }
 
       const data = await response.json();
-      setToken(data.accessToken); // Update token dengan token yang baru
+      setToken(data.accessToken);
+      localStorage.setItem("token", data.accessToken);
 
-      // Ambil data pengguna setelah profil diupdate
+      // Ambil ulang data user setelah update
       const userData = await fetchUserData(data.accessToken);
-      setUser(userData);
-      console.log("Profile updated successfully!");
+      if (userData) {
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+      }
+
+      console.log("✅ Profile updated successfully!");
     } catch (error) {
-      console.error('Gagal update profile:', error);
+      console.error("❌ Gagal update profile:", error);
     }
   };
 
-
-
-  // Login: Menyimpan token dan data user
+  // 🔑 Login: Simpan token & user data
   const login = (tokenData, userData) => {
     setToken(tokenData);
     setUser(userData);
-    console.log("Login berhasil:", userData);
+    localStorage.setItem("token", tokenData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    console.log("✅ Login berhasil:", userData);
   };
 
-  // Logout: Membersihkan token dan data user
+  // 🚪 Logout: Hapus token & user data
   const logout = () => {
     setToken(null);
     setUser(null);
-    console.log("User logged out");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    console.log("🚪 User logged out");
   };
 
-  // Refresh token saat aplikasi dimuat
+  // Saat halaman dimuat, coba refresh token jika ada
   useEffect(() => {
-    refreshAccessToken();
+    const checkLoginStatus = async () => {
+      if (token) {
+        const newToken = await refreshAccessToken();
+        if (!newToken) {
+          console.warn("⚠️ Token expired, user tetap login tetapi butuh refresh manual.");
+        }
+      }
+      setLoading(false);
+    };
+
+    checkLoginStatus();
   }, []);
 
+  if (loading) return <p>Loading...</p>; // Hindari flash logout saat refresh
+
   return (
-    <AuthContext.Provider value={{ token, user, setToken, setUser, login, logout, UpdateUser }}>
-    {children}
-</AuthContext.Provider>
-
-
+    <AuthContext.Provider value={{ token, user, setToken, setUser, login, logout, UpdateUser, refreshAccessToken}}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
