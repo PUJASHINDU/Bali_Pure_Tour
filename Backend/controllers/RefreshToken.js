@@ -13,10 +13,9 @@ export const refreshToken = async (req, res) => {
 
     // Cari user berdasarkan refresh token
     const user = await User.findOne({
-      where: {
-        refresh_token: refreshToken,
-      },
+      where: { refresh_token: refreshToken },
     });
+
     if (!user) {
       return res.sendStatus(403); // Forbidden
     }
@@ -32,14 +31,14 @@ export const refreshToken = async (req, res) => {
       const name = user.name;
       const email = user.email;
 
-      // Buat access token baru
+      // Buat access token baru (perbaiki typo ACCESS_TOKEN_SECRET)
       const accessToken = jwt.sign(
         { userId, name, email },
         process.env.ACCSESS_TOKEN_SECRET,
-        { expiresIn: "15m" } // Access token hanya berlaku 15 menit
+        { expiresIn: "15m" } // Token berlaku 15 menit
       );
 
-      res.json({ accessToken }); // Kirimkan access token baru
+      res.json({ accessToken }); // Kirim token baru
     });
   } catch (error) {
     console.error("Unexpected error:", error);
