@@ -1,8 +1,8 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
-import User from "./UserModel.js"
-import PackageTour from "./PackgeTourModel.js";
-import Payment from "./PaymentModel.js"
+import PackageTour from "./PackgeTourModel.js"; // Import PackageTour
+import User from "./UserModel.js"; // Import User
+
 const { DataTypes } = Sequelize;
 
 const Booking = db.define(
@@ -10,61 +10,71 @@ const Booking = db.define(
   {
     id_booking: {
       type: DataTypes.INTEGER,
-      allowNull: false,
       autoIncrement: true,
       primaryKey: true,
     },
-    id_user: {
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "User", // Nama tabel User
+        model: User,
         key: "id",
       },
+    },
+    full_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     id_package: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Packagetour", // Nama tabel PackageTour
+        model: PackageTour,
         key: "id_package",
       },
     },
-    id_payment: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Payment", // Nama tabel Payments
-        key: "id_payment",
-      },
+    package_name: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
-    booking_date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    people_join: {
+    num_participants: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    price_tour: {
-      type: DataTypes.DECIMAL(10, 2),
+    checkin_date: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
+    },
+    price: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "confirmed", "canceled"),
+      defaultValue: "pending",
     },
   },
   {
     freezeTableName: true,
   }
 );
-// Relasi Booking -> User
-Booking.belongsTo(User, { foreignKey: "user_id", as: "User", });
-User.hasMany(Booking, { foreignKey: "user_id", as: "Booking" });
 
-// Relasi Booking dengan PackageTour (One-to-Many)
+// **Relasi**
+Booking.belongsTo(User, { foreignKey: "user_id", as: "User" });
+User.hasMany(Booking, { foreignKey: "user_id", as: "Bookings", onDelete: "CASCADE" });
+
 Booking.belongsTo(PackageTour, { foreignKey: "id_package", as: "Package" });
-PackageTour.hasMany(Booking, { foreignKey: "id_package" });
-
-// Relasi Booking dengan Payment (One-to-One)
-Booking.belongsTo(Payment, { foreignKey: "id_payment", as: "Payment" });
-Payment.hasOne(Booking, { foreignKey: "id_payment", as: "Booking" });
+PackageTour.hasMany(Booking, { foreignKey: "id_package", as: "Bookings", onDelete: "CASCADE" });
 
 export default Booking;
