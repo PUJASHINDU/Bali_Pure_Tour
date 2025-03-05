@@ -10,6 +10,7 @@ import { getAllCardDestinations } from "../controllers/CardDestination.js";
 import { getGalleryImages } from "../controllers/CardDestination.js";
 import { uploadGalleryImages, updateGalleryImages  } from "../controllers/Galeries.js";
 import { createBooking , getUserBookings } from "../controllers/Booking.js";
+import { createPayment } from "../controllers/Payment.js";
 import { authenticateUser } from "../middleware/authenticateUser.js"; // Pastikan import
 
 
@@ -29,7 +30,8 @@ router.post('/booking-tour', verifyToken, createBooking, async (req, res) => {
   console.log("Token diterima:", req.headers.authorization);
   console.log("Payload booking:", req.body);
 });
-router.get("/getUserBooking", authenticateUser, getUserBookings);
+router.get("/getUserBooking", verifyToken, getUserBookings);
+router.post("/create-payment", createPayment);
 
 
 
