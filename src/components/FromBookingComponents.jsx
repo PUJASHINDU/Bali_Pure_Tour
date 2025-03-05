@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext"; // Pastikan import useAuth
 import axios from "axios";
 import {
@@ -17,6 +17,7 @@ import {
 
 const FormBookingComponents = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { token, refreshAccessToken } = useAuth(); // Ambil token & fungsi refresh
   const locationState = location.state || {};
   const { packageName: initialPackageName = "Bali Pure Tour" } = locationState;
@@ -118,8 +119,11 @@ const FormBookingComponents = () => {
         withCredentials: true,
       });
 
-      console.log("✅ Booking berhasil:", response.data);
       alert("Booking berhasil!");
+      setTimeout(() => {
+        navigate("/BookingInformationPage");
+      }, 500); // Delay 500ms agar alert muncul dulu
+
 
     } catch (error) {
       console.error("❌ Gagal booking:", error.response ? error.response.data : error.message);

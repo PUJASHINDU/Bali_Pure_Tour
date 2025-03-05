@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+
 import { useAuth } from "../Context/AuthContext"; // Ambil token dari AuthContext
 import {
   Card,
@@ -10,34 +11,107 @@ import {
 
 const BookingInformationComponent = () => {
   const [bookingData, setBookingData] = useState(null);
-  const { token } = useAuth(); // Ambil token dari AuthContext
+  const { token, refreshAccessToken } = useAuth(); // Ambil token & fungsi refresh
 
   useEffect(() => {
+
     const fetchBookingData = async () => {
-      const token = localStorage.getItem("accessToken"); // ✅ Ambil token dari localStorage
-
-      if (!token) {
-        console.error("Token not found, redirecting to login...");
-        return;
-      }
-
       try {
+        let currentToken = token;
+
+        // 🔍 **Cek apakah token ada atau harus refresh**
+        if (!currentToken) {
+          console.log("⚠️ Token kosong, mencoba refresh...");
+          currentToken = await refreshAccessToken();
+          if (!currentToken) throw new Error("Gagal refresh token!");
+        }
+
+        // ✅ **Gunakan endpoint yang benar**
         const response = await axios.get("http://localhost:5000/getUserBooking", {
-          headers: { Authorization: `Bearer ${token}` }, // ✅ Kirim token di header
+          headers: { Authorization: `Bearer ${currentToken}` }, // ✅ Kirim token di header
           withCredentials: true, // Pastikan cookie dikirim
         });
 
-        console.log("Response Data:", response.data);
-        setBookingData(response.data.data); // ✅ Simpan data booking
+        console.log("✅ Data booking diterima:", response.data);
+
+        // 🔥 **Ambil hanya 1 booking terbaru**
+        const latestBooking = response.data.data
+          ?.sort((a, b) => b.id_booking - a.id_booking) // Urutkan dari terbaru ke terlama
+          ?.slice(0, 1)[0]; // Ambil 1 data terbaru
+
+        setBookingData(latestBooking);
 
       } catch (error) {
-        console.error("Error fetching booking data:", error.response?.data || error.message);
+        console.error("❌ Error fetching booking data:", error.response?.data || error.message);
+
+        // 🚨 **Cek jika error karena token expired**
+        if (error.response?.status === 403) {
+          console.log("⚠️ Token mungkin expired, mencoba refresh...");
+          const newToken = await refreshAccessToken();
+
+          if (newToken) {
+            console.log("🔄 Token berhasil diperbarui, mencoba fetch ulang...");
+            fetchBookingData(); // 🔄 **Coba fetch ulang dengan token baru**
+          } else {
+            console.error("❌ Gagal refresh token, user harus login ulang.");
+            alert("Session expired! Silakan login ulang.");
+          }
+        }
       }
     };
 
-
     fetchBookingData();
   }, [token]); // Refresh data jika token berubah
+
+  const handlePayment = async () => {
+    try {
+      if (!bookingData) {
+        alert("Booking data belum tersedia!");
+        return;
+      }
+
+      const response = await axios.post("http://localhost:5000/create-payment",
+        {
+          order_id: `order-${new Date().getTime()}`,
+          gross_amount: bookingData?.price || 0,
+          first_name: bookingData?.full_name.split(" ")[0] || "Guest",
+          last_name: bookingData?.full_name.split(" ")[1] || "",
+          email: bookingData?.email,
+          phone: bookingData?.phone_number,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // ✅ Gunakan variabel baru untuk token pembayaran
+      const { token: paymentToken } = response.data;
+      if (!paymentToken) {
+        throw new Error("Token pembayaran tidak diterima dari server.");
+      }
+
+      window.snap.pay(paymentToken, {
+        onSuccess: (result) => {
+          console.log("✅ Payment Success:", result);
+          alert("Payment Success!");
+        },
+        onPending: (result) => {
+          console.log("⚠️ Payment Pending:", result);
+          alert("Payment Pending! Please complete the payment.");
+        },
+        onError: (error) => {
+          console.log("❌ Payment Error:", error);
+          alert("Payment Failed!");
+        },
+        onClose: () => {
+          console.log("🔴 Payment popup closed.");
+        },
+      });
+    } catch (error) {
+      console.error("❌ Error processing payment:", error);
+      alert("Error processing payment: " + error.message);
+    }
+  };
 
 
   return (
@@ -47,60 +121,68 @@ const BookingInformationComponent = () => {
           {/* Title */}
           <Typography variant="h4" className="mb-2 text-xl font-poppins">
             <span className="text-customGreen font-medium">Hallo</span>{" "}
-            <span className="text-customGreenslow font-semibold">{bookingData?.full_name || "-"}</span>
+            <span className="text-customGreenslow font-semibold">
+              {bookingData?.full_name || "No booking found"}
+            </span>
           </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            Here are your tour package booking details along with the order status and payment status.
-          </Typography>
+          {/* Jika tidak ada booking */}
+          {!bookingData ? (
+            <Typography className="font-poppins text-center text-gray-500">
+              No booking found
+            </Typography>
+          ) : (
+            <>
+              <Typography className="font-poppins text-justify mb-2">
+                Here are your latest tour package booking details.
+              </Typography>
 
-          {/* Booking Details */}
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">Email</h1>
-            {bookingData?.email || "-"}
-          </Typography>
+              {/* Booking Details */}
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">Email</h1>
+                {bookingData.email || "-"}
+              </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">Phone Number</h1>
-            {bookingData?.phone_number || "-"}
-          </Typography>
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">Phone Number</h1>
+                {bookingData.phone_number || "-"}
+              </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">Package ID</h1>
-            {bookingData?.id_package || "-"}
-          </Typography>
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">Package Tour Name</h1>
+                {bookingData.package_name || "-"}
+              </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">People Join the Tour</h1>
-            {bookingData?.num_participants || "-"} People
-          </Typography>
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">People Join the Tour</h1>
+                {bookingData.num_participants || "-"} People
+              </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">Price Package Tour</h1>
-            ${bookingData?.price || "-"}
-          </Typography>
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">Price Package Tour</h1>
+                ${bookingData.price || "-"}
+              </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">Tour Date</h1>
-            {bookingData?.checkin_date || "-"}
-          </Typography>
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">Tour Date</h1>
+                {bookingData.checkin_date || "-"}
+              </Typography>
 
-          <Typography className="font-poppins text-justify mb-2">
-            <h1 className="text-base font-semibold">Status Booking</h1>
-            {bookingData?.status || "-"}
-          </Typography>
+              <Typography className="font-poppins text-justify mb-2">
+                <h1 className="text-base font-semibold">Status Booking</h1>
+                {bookingData.status || "-"}
+              </Typography>
 
-          <div className="mt-1 mb-3">
-            <a href="#" className="inline-block">
               <Button
                 size="md"
                 variant="text"
                 className="flex items-center gap-2 font-semibold font-poppins bg-customGreen text-white"
+                onClick={handlePayment} // Tambahkan fungsi pembayaran
               >
-                Print Invoice !!
+                Pay Now !!
               </Button>
-            </a>
-          </div>
+            </>
+          )}
 
           <Typography className="font-poppins text-justify mb-2">
             <h1 className="text-lg font-semibold text-customGreen">Information :</h1>
