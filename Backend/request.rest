@@ -13,8 +13,8 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:5000/get-card-destination/31
-Content-Type: application/json
+GET http://localhost:5000/getUserBooking
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJuYW1lIjoiSmVmcmluaWNob2wiLCJlbWFpbCI6ImplZnJpQGdtYWlsLmNvbSIsInByb2ZpbGVQaWN0dXJlIjoiZGVmYXVsdC5qcGciLCJpYXQiOjE3NDA5OTY5MzcsImV4cCI6MTc0MDk5Njk4N30.XA2ZQXJNQDvGxHhCpGDbsZBk-h-sEfbupHq_WfMQQyo
 
 ###
 GET http://localhost:5000/package-tour/10
@@ -25,8 +25,8 @@ POST http://localhost:5000/login
 Content-Type: application/json
 
 {
-  "email": "Yoga@gamil.com",
-  "password": "Yoga1234"
+  "email": "jefri@gmail.com",
+  "password": "12345678"
 }
 
 ### Update User Info (with Authorization Header)
@@ -260,3 +260,32 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJuY
 
 
 #CODE API Booking END
+
+#testing payment
+
+### Test Create Payment (Midtrans)
+# POST http://localhost:5000/create-payment
+# Content-Type: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJuYW1lIjoiSmVmcmluaWNob2wiLCJlbWFpbCI6ImplZnJpQGdtYWlsLmNvbSIsImlhdCI6MTc0MTEzODU1NCwiZXhwIjoxNzQxMTM5NDU0fQ.a257OrxRDMMJPA0upBoiiSRbxXIzWrXtIpU291H2vqw
+
+# {
+#   "order_id": "order-12345",
+#   "gross_amount": 100000,
+#   "first_name": "John",
+#   "last_name": "Doe",
+#   "email": "johndoe@example.com",
+#   "phone": "08123456789"
+# }
+
+###
+POST http://localhost:5000/create-payment
+Content-Type: application/json
+
+{
+  "order_id": "INV-12345",
+  "gross_amount": 500000,
+  "first_name": "Puja",
+  "last_name": "Jaksel",
+  "email": "puja@example.com",
+  "phone": "08123456789"
+}
