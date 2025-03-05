@@ -1,43 +1,46 @@
+import dotenv from 'dotenv';
+import midtransClient from 'midtrans-client';
 
-import snap from '../payment/midtransClient.js';
-import Transaction from '../models/TransactionModel.js';
+dotenv.config();
 
+// ✅ Pastikan serverKey terbaca dari .env
+const snap = new midtransClient.Snap({
+  isProduction: false,
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
+});
+
+// ✅ Fungsi untuk membuat transaksi Midtrans
 export const createPayment = async (req, res) => {
-    const { id_booking, total_price, payment_method } = req.body;
+  try {
+    console.log("📌 Data Request Payment:", req.body); // Debugging
 
-    const orderId = `order-${id_booking}-${Date.now()}`;
+    const { order_id, gross_amount, first_name, email, phone } = req.body;
 
-    const parameter = {
-        transaction_details: {
-            order_id: orderId,
-            gross_amount: total_price
-        },
-        credit_card: {
-            secure: true
-        },
-        customer_details: {
-            first_name: 'User', // Ubah sesuai kebutuhan
-            email: 'user@example.com'
-        }
+    if (!order_id || !gross_amount || !email) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    let parameter = {
+      transaction_details: {
+        order_id: order_id,
+        gross_amount: gross_amount,
+      },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        first_name: first_name || "Guest",
+        email: email,
+        phone: phone || "",
+      },
     };
 
-    try {
-        const transaction = await snap.createTransaction(parameter);
+    const transaction = await snap.createTransaction(parameter);
+    console.log("✅ Transaction Token:", transaction.token);
 
-        // Simpan transaksi ke database
-        const newTransaction = await Transaction.create({
-            id_booking,
-            total_price,
-            payment_method,
-            payment_status: 'pending'
-        });
-
-        res.status(200).json({
-            token: transaction.token,
-            redirect_url: transaction.redirect_url,
-            transaction: newTransaction
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({ token: transaction.token });
+  } catch (error) {
+    console.error("❌ Error Midtrans:", error.response?.data || error.message);
+    res.status(500).json({ message: "Payment creation failed", error: error.message });
+  }
 };
