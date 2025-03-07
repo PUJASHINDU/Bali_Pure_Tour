@@ -31,6 +31,7 @@ import FormDetailPesananpage from './Admin/pages/FormDetailPesananpage';
 import FromTambahPaketTour from './Admin/pages/FromTambahPaketTour';
 import FormTambahCardPaketTour from './Admin/pages/FormTambahCardPaketTourpage';
 import ManajemenPackageTour from './Admin/pages/ManajemenPaketTourpage';
+import PaymentSuccessPage from "./Admin/pages/PaymentSuccessPage";
 
 
 const App = () => {
@@ -64,6 +65,7 @@ const App = () => {
     <Route path="/Servicepage" element={<Servicepage/>} />
     <Route path="/Booking" element={<Booking />} />
     <Route path="/Avatarpage" element={<Avatarpage />} />
+    <Route path="/payment-success/:order_id" element={<PaymentSuccessPage />} />
     </Routes>
     </div>
   )
