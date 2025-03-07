@@ -70,34 +70,47 @@ const BookingInformationComponent = () => {
         return;
       }
 
-      const response = await axios.post("http://localhost:5000/create-payment",
-        {
-          order_id: `order-${new Date().getTime()}`,
-          gross_amount: bookingData?.price || 0,
-          first_name: bookingData?.full_name.split(" ")[0] || "Guest",
-          last_name: bookingData?.full_name.split(" ")[1] || "",
-          email: bookingData?.email,
-          phone: bookingData?.phone_number,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const paymentData = {
+        id_booking: bookingData.id_booking,
+        total_price: bookingData.price || 0,
+        full_name: bookingData.full_name || "Guest",
+        email: bookingData.email || "-",
+        phone_number: bookingData.phone_number || "-",
+        package_name: bookingData.package_name || "-",
+        num_participants: bookingData.num_participants || "-",
+        checkin_date: bookingData.checkin_date === "-" ? null : bookingData.checkin_date, // ✅ Perbaiki ini
+        payment_method: bookingData.num_payment_method || "-",
+      };
+
+      console.log("📌 Data ke backend:", paymentData);
+
+      const response = await axios.post(
+        "http://localhost:5000/create-payment",
+        paymentData,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // ✅ Gunakan variabel baru untuk token pembayaran
-      const { token: paymentToken } = response.data;
-      if (!paymentToken) {
-        throw new Error("Token pembayaran tidak diterima dari server.");
-      }
+      const { token: paymentToken, order_id } = response.data;
+      if (!paymentToken) throw new Error("Token pembayaran tidak diterima.");
 
       window.snap.pay(paymentToken, {
         onSuccess: (result) => {
           console.log("✅ Payment Success:", result);
-          alert("Payment Success!");
+
+          // 🔥 Ambil order_id dari Midtrans atau backend
+          const orderID = result.order_id || order_id;
+
+          if (!orderID) {
+            alert("Error: Order ID tidak ditemukan!");
+            return;
+          }
+
+          // 🚀 Redirect ke halaman sukses dengan order_id
+          window.location.href = `/payment-success/${orderID}`;
         },
         onPending: (result) => {
           console.log("⚠️ Payment Pending:", result);
-          alert("Payment Pending! Please complete the payment.");
+          alert("Payment Pending!");
         },
         onError: (error) => {
           console.log("❌ Payment Error:", error);
@@ -112,6 +125,7 @@ const BookingInformationComponent = () => {
       alert("Error processing payment: " + error.message);
     }
   };
+
 
 
   return (
