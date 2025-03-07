@@ -9,7 +9,7 @@ import path from "path";
 import fs from "fs";
 import multer from "multer";
 import { fileURLToPath } from "url";
-// import Booking from "./models/BookingModel.js";
+// import Transaction from "./models/TransactionModel.js";
 
 // Dapatkan direktori saat ini
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +28,7 @@ dotenv.config();
 // try {
 //   await db.authenticate();
 //   console.log("Database Connected......");
-//   await Booking.sync({ alter: true }); // Sync dengan perubahan struktur
+//   await Transaction.sync({ alter: true }); // Sync dengan perubahan struktur
 //   console.log("Booking table updated!");
 // } catch (error) {
 //   console.error("Error updating database:", error);
