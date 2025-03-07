@@ -8,9 +8,13 @@ const Transaction = db.define(
   "transaction",
   {
     id_transaction: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.STRING, // ✅ Ubah ke STRING agar bisa simpan `order_id`
       primaryKey: true,
+    },
+    order_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true, // ✅ Pastikan order_id unik
     },
     id_booking: {
       type: DataTypes.INTEGER,
@@ -19,6 +23,18 @@ const Transaction = db.define(
         model: "Booking",
         key: "id_booking",
       },
+    },
+    full_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     total_price: {
       type: DataTypes.FLOAT,
@@ -29,14 +45,27 @@ const Transaction = db.define(
       defaultValue: "pending",
       allowNull: false,
     },
-    payment_method: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     transaction_date: {
       type: DataTypes.DATE,
       defaultValue: Sequelize.NOW,
       allowNull: false,
+    },
+    package_name: {
+      type: DataTypes.STRING, // ✅ Tambahkan nama paket
+      allowNull: false,
+    },
+    payment_method: {
+      type: DataTypes.STRING,
+      allowNull: true, 
+    },
+
+    num_participants: {
+      type: DataTypes.INTEGER, // ✅ Tambahkan jumlah peserta
+      allowNull: false,
+    },
+    checkin_date: {
+      type: DataTypes.DATE, // ✅ Tambahkan tanggal check-in
+      allowNull: true,
     },
   },
   {
