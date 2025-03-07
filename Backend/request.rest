@@ -282,10 +282,9 @@ POST http://localhost:5000/create-payment
 Content-Type: application/json
 
 {
-  "order_id": "INV-12345",
-  "gross_amount": 500000,
-  "first_name": "Puja",
-  "last_name": "Jaksel",
+  "id_booking": 31,
+  "total_price": 500000,
+  "full_name": "Puja",
   "email": "puja@example.com",
-  "phone": "08123456789"
+  "phone_number": "08123456789"
 }
