@@ -1,51 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Typography,
   Card,
   CardBody,
 } from '@material-tailwind/react';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import userDefaultImg from '../../assets/icon/profile.jpg';
 
-// Register chart components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
 const HomeAdmin = () => {
-  // Data dummy untuk statistik
-  const totalTransactions = 120;
-  const totalUsers = 45;
-  const totalRevenue = "$12,340";
-  const activePackages = 8;
+  const [totalTransactions, setTotalTransactions] = useState(null);
+  const [totalUsers, setTotalUsers] = useState(null);
+  const [totalRevenue, setTotalRevenue] = useState(null);
+  const [activePackages, setActivePackages] = useState(null);
+  const [recentBookings, setRecentBookings] = useState([]);
 
-  // Data dummy untuk grafik penjualan
-  const salesData = {
-    labels: ['January', 'February', 'March', 'April', 'May'],
-    datasets: [
-      {
-        label: 'Sales',
-        data: [5, 12, 8, 15, 20],
-        fill: false,
-        borderColor: '#4CAF50',
-        backgroundColor: '#A5D6A7',
-        tension: 0.4,
-        pointBackgroundColor: '#4CAF50',
-        pointBorderColor: '#ffffff',
-        pointRadius: 5,
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [transactionsRes, usersRes, revenueRes, packagesRes, bookingsRes] = await Promise.all([
+          axios.get('http://localhost:5000/transactions/total'),
+          axios.get('http://localhost:5000/users/total'),
+          axios.get('http://localhost:5000/revenue/total'),
+          axios.get('http://localhost:5000/packages/active'),
+          axios.get('http://localhost:5000/bookings/recent'),
+        ]);
 
-  const recentBookings = [
-    { id: 1, user: 'John Doe', package: 'Bali Adventure', date: '2025-01-12' },
-    { id: 2, user: 'Jane Smith', package: 'Island Hopping', date: '2025-01-11' },
-    { id: 3, user: 'Adam Brown', package: 'Cultural Tour', date: '2025-01-10' },
-  ];
+        console.log("Data transaksi:", transactionsRes.data);
+        console.log("Data pengguna:", usersRes.data);
+        console.log("Data pendapatan:", revenueRes.data);
+        console.log("Data paket aktif:", packagesRes.data);
+        console.log("Data booking terbaru:", bookingsRes.data);
+
+        setTotalTransactions(transactionsRes.data.totalTransactions || 0);
+        setTotalUsers(usersRes.data.totalUsers || 0);
+        setTotalRevenue(revenueRes.data.totalRevenue ? `$${revenueRes.data.totalRevenue.toFixed(2)}` : "$0");
+        setActivePackages(packagesRes.data.activePackages || 0);
+        setRecentBookings(Array.isArray(bookingsRes.data.recentBookings) ? bookingsRes.data.recentBookings : []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="px-4 py-8 container mx-auto font-poppins">
-      {/* Header Selamat Datang */}
-      <div className="flex flex-col md:flex-row items-center bg-gradient-to-r from-green-100 via-white to-green-50 p-6 rounded-lg shadow-md mb-8 font-poppins">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-center bg-gradient-to-r from-green-100 via-white to-green-50 p-6 rounded-lg shadow-md mb-8">
         <img src={userDefaultImg} alt="Admin" className="w-28 h-28 rounded-full object-cover mr-6" />
         <div>
           <Typography variant="h4" className="font-bold text-gray-800 mb-2 font-poppins">
@@ -57,81 +59,59 @@ const HomeAdmin = () => {
         </div>
       </div>
 
-      {/* Ringkasan Data */}
+      {/* Ringkasan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="p-4 shadow-lg hover:shadow-xl border rounded-lg">
-          <Typography variant="h6" className="text-customGreenslow font-poppins">
-            Total Transaksi
-          </Typography>
-          <Typography variant="h4" className="font-bold text-customGreen font-poppins mt-2 text-[19px]">
-            {totalTransactions}
+        <Card className="p-4 shadow-lg border rounded-lg">
+          <Typography variant="h6" className='font-poppins text-customGreenslow'>Total Transaksi</Typography>
+          <Typography variant="h4" className="font-bold text-customGreen font-poppins">
+            {totalTransactions !== null ? totalTransactions : "Loading..."}
           </Typography>
         </Card>
-        <Card className="p-4 shadow-lg hover:shadow-xl border rounded-lg">
-          <Typography variant="h6" className="text-customGreenslow font-poppins ">
-            Jumlah Pengguna
-          </Typography>
-          <Typography variant="h4" className="font-bold text-customGreen font-poppins mt-2 text-[19px]">
-            {totalUsers}
+        <Card className="p-4 shadow-lg border rounded-lg ">
+          <Typography variant="h6" className='font-poppins text-customGreenslow'>Jumlah Pengguna</Typography>
+          <Typography variant="h4" className="font-bold text-customGreen font-poppins" >
+            {totalUsers !== null ? totalUsers : "Loading..."}
           </Typography>
         </Card>
-        <Card className="p-4 shadow-lg hover:shadow-xl border rounded-lg">
-          <Typography variant="h6" className="text-customGreenslow font-poppins">
-            Total Pendapatan
-          </Typography>
-          <Typography variant="h4" className="font-bold text-customGreen font-poppins mt-2 text-[19px]">
-            {totalRevenue}
+        <Card className="p-4 shadow-lg border rounded-lg">
+          <Typography variant="h6" className='font-poppins text-customGreenslow'>Total Pendapatan</Typography>
+          <Typography variant="h4" className="font-bold text-customGreen font-poppins">
+            {totalRevenue !== null ? totalRevenue : "Loading..."}
           </Typography>
         </Card>
-        <Card className="p-4 shadow-lg hover:shadow-xl border rounded-lg">
-          <Typography variant="h6" className="text-customGreenslow font-poppins">
-            Paket Tour Aktif
-          </Typography>
-          <Typography variant="h4" className="font-bold text-customGreen font-poppins mt-2 text-[19px]">
-            {activePackages}
+        <Card className="p-4 shadow-lg border rounded-lg">
+          <Typography variant="h6" className='font-poppins text-customGreenslow'>Paket Tour Aktif</Typography>
+          <Typography variant="h4" className="font-bold text-customGreen font-poppins">
+            {activePackages !== null ? activePackages : "Loading..."}
           </Typography>
         </Card>
       </div>
 
-      {/* Grafik Penjualan */}
-      <div className="mb-8">
-        <Card className="shadow-lg border rounded-lg">
-          <CardBody>
-            <Typography variant="h6" className="mb-4 font-semibold text-customGreenslow font-poppins">
-              Grafik Penjualan
-            </Typography>
-            <Line data={salesData} />
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Ringkasan Pemesanan Terbaru */}
-      <div>
-        <Card className="shadow-lg border rounded-lg">
-          <CardBody>
-            <Typography variant="h6" className="mb-4 font-semibold text-customGreenslow font-poppins">
-              Pemesanan Terbaru
-            </Typography>
-            <ul className="divide-y divide-gray-200">
-              {recentBookings.map((booking) => (
-                <li key={booking.id} className="py-3 flex justify-between items-center">
+      {/* Pemesanan Terbaru */}
+      <Card className="shadow-lg border rounded-lg">
+        <CardBody>
+          <Typography variant="h6" className="mb-4 font-semibold font-poppins text-customGreenslow">
+            Daftar Booking
+          </Typography>
+          <ul className="divide-y">
+            {recentBookings && recentBookings.length > 0 ? (
+              recentBookings.map((booking) => (
+                <li key={booking.id_booking} className="py-3 flex justify-between items-center font-poppins">
                   <div>
-                    <Typography variant="small" className="text-customGreenslow font-poppins">
-                      {booking.user}
-                    </Typography>
-                    <Typography variant="small" className="text-customGreenslow font-poppins">
-                      {booking.package}
-                    </Typography>
+                    <Typography variant="small" className='font-poppins'>{booking.full_name}</Typography>
+                    <Typography variant="small" className='font-poppins text-customGreen'>{booking.package_name}</Typography>
                   </div>
-                  <Typography variant="small" className="text-gray-400 font-poppins">
-                    {booking.date}
-                  </Typography>
+                  <Typography variant="small" className="text-customGreenslow font-poppins">{booking.checkin_date}</Typography>
                 </li>
-              ))}
-            </ul>
-          </CardBody>
-        </Card>
-      </div>
+              ))
+            ) : (
+              <Typography variant="small" className="text-gray-500 text-center py-3">
+                Tidak ada pemesanan terbaru
+              </Typography>
+            )}
+          </ul>
+        </CardBody>
+      </Card>
     </div>
   );
 };
