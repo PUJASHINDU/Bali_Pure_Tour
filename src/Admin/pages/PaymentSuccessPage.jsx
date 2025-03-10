@@ -37,9 +37,9 @@ const PaymentSuccessPage = () => {
             Deskripsi Pembayaran
           </Typography>
 
-          <Typography className="text-gray-600 text-center mt-2">
+          {/* <Typography className="text-gray-600 text-center mt-2">
             Thank you, {transaction.full_name}!
-          </Typography>
+          </Typography> */}
 
           <div className="mt-4">
             <div className="flex justify-between items-center gap-x-4 mb-2">
@@ -105,13 +105,16 @@ const PaymentSuccessPage = () => {
             </div>
 
             <div className="flex justify-between items-center gap-x-4 mb-2">
-              <h1 className="text-base font-semibold w-1/2">Payment Method</h1>
+              <h1 className="text-base font-semibold font-poppins w-1/2">Payment Method</h1>
               <Typography className="font-poppins w-1/2">
                 {transaction.payment_method?.toUpperCase() || "Unknown"}
               </Typography>
             </div>
 
           </div>
+
+
+
 
           <div className="mt-6 text-center">
             <Button
