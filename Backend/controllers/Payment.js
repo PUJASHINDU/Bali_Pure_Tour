@@ -13,7 +13,7 @@ export const createPayment = async (req, res) => {
   try {
     console.log("📥 Data yang diterima dari frontend:", req.body);
 
-    const { id_booking, total_price, full_name, email, phone_number, package_name, num_participants, checkin_date, payment_method } = req.body;
+    const { id_booking, total_price, full_name, email, phone_number, package_name, num_participants, checkin_date, payment_method, payment_numbers } = req.body;
 
     if (!id_booking || !total_price || !email || !phone_number) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -40,6 +40,7 @@ export const createPayment = async (req, res) => {
       num_participants,
       checkin_date: formattedCheckinDate,
       payment_method,
+      payment_numbers,
 
     });
 
@@ -81,15 +82,19 @@ export const paymentNotification = async (req, res) => {
 
     let payment_status = "pending";
     let payment_method = "Unknown"; // Default kalau data kosong
+    let payment_numbers = null;
+
 
     // 🔥 **Ambil Payment Method dari Midtrans**
     if (va_numbers && va_numbers.length > 0) {
-      payment_method = va_numbers[0].bank; // Misal: "bni", "bri", dll.
+      payment_method = va_numbers[0].bank.toUpperCase(); // Misal: "BNI", "BRI"
+      payment_numbers = JSON.stringify(va_numbers); // Simpan VA Numbers dalam bentuk JSON
     } else if (payment_type) {
-      payment_method = payment_type; // Misal: "gopay", "shopeepay"
+      payment_method = payment_type.toUpperCase(); // Misal: "GOPAY", "SHOPEEPAY"
     }
 
-    console.log("💰 Metode Pembayaran:", payment_method); // Debugging
+    console.log("💰 Metode Pembayaran:", payment_method);
+    console.log("📌 Nomor VA:", payment_numbers);
 
     if (transaction_status === "settlement" || transaction_status === "capture") {
       payment_status = "paid";
@@ -105,9 +110,19 @@ export const paymentNotification = async (req, res) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // ✅ **Update status & metode pembayaran**
+    // let payment_numbers = null;
+
+    if (va_numbers && va_numbers.length > 0) {
+      payment_numbers = va_numbers[0].va_number; // Ambil hanya nomor VA
+    }
+
     await Transaction.update(
-      { payment_status, payment_method, updatedAt: new Date() },
+      {
+        payment_status,
+        payment_method,
+        payment_numbers, // Simpan hanya nomor VA
+        updatedAt: new Date()
+      },
       { where: { order_id } }
     );
 
@@ -144,6 +159,7 @@ export const getTransactionDetail = async (req, res) => {
         "payment_status",
         "transaction_date",
         "payment_method",
+        "payment_numbers",
       ],
     });
 
@@ -151,9 +167,41 @@ export const getTransactionDetail = async (req, res) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    res.json(transaction);
+    // ✅ **Pastikan payment_numbers diparse ke JSON**
+    let payment_numbers = [];
+    if (transaction.payment_numbers) {
+      try {
+        payment_numbers = JSON.parse(transaction.payment_numbers);
+      } catch (error) {
+        console.error("❌ Error parsing payment_numbers:", error.message);
+      }
+    }
+
+    res.json({ ...transaction.toJSON(), payment_numbers }); // Kirim hasil parsing
   } catch (error) {
     console.error("❌ Error fetching transaction:", error.message);
     res.status(500).json({ message: "Failed to fetch transaction", error: error.message });
+  }
+};
+
+export const getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.findAll({
+      attributes: [
+        "id_transaction",
+        "order_id",
+        "full_name",
+        "package_name",
+        "transaction_date",
+        "payment_method",
+        "payment_status",
+      ],
+      order: [["transaction_date", "DESC"]], // Urutkan transaksi dari terbaru
+    });
+
+    res.json(transactions);
+  } catch (error) {
+    console.error("❌ Error fetching transactions:", error.message);
+    res.status(500).json({ message: "Failed to fetch transactions", error: error.message });
   }
 };

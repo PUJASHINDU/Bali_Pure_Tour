@@ -58,8 +58,8 @@ export const getAllBookings = async (req, res) => {
 // ✅ Ambil Booking Berdasarkan ID
 export const getBookingById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const booking = await Booking.findByPk(id, {
+    const { id_booking } = req.params;  // ✅ Benar
+    const booking = await Booking.findByPk(id_booking, {
       include: [{ model: PackageTour, as: "Package" }],
     });
 
@@ -128,6 +128,30 @@ export const getUserBookings = async (req, res) => {
 
     res.json({ data: bookings });
 
+  } catch (error) {
+    res.status(500).json({ message: "Terjadi kesalahan", error: error.message });
+  }
+};
+
+// ✅ Update Status Booking oleh Admin
+export const updateBookingStatusByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatus = ["pending", "confirmed", "canceled"];
+    if (!validStatus.includes(status)) {
+      return res.status(400).json({ message: "Status tidak valid" });
+    }
+
+    const booking = await Booking.findByPk(id);
+    if (!booking) return res.status(404).json({ message: "Booking tidak ditemukan" });
+
+    // 🔥 Update status booking
+    booking.status = status;
+    await booking.save();
+
+    res.status(200).json({ message: `Status booking ${id} berhasil diupdate ke ${status}`, data: booking });
   } catch (error) {
     res.status(500).json({ message: "Terjadi kesalahan", error: error.message });
   }

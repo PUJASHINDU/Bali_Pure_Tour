@@ -9,9 +9,20 @@ import { createCardDestination, updateCardDestination, deleteCardDestinationWith
 import { getAllCardDestinations } from "../controllers/CardDestination.js";
 import { getGalleryImages } from "../controllers/CardDestination.js";
 import { uploadGalleryImages, updateGalleryImages  } from "../controllers/Galeries.js";
-import { createBooking , getUserBookings } from "../controllers/Booking.js";
-import { createPayment, paymentNotification,  getTransactionDetail } from "../controllers/Payment.js";
+import { createBooking , getUserBookings, getAllBookings, updateBookingStatusByAdmin, getBookingById } from "../controllers/Booking.js";
+import { createPayment, paymentNotification,  getTransactionDetail, getAllTransactions } from "../controllers/Payment.js";
 import { authenticateUser } from "../middleware/authenticateUser.js"; // Pastikan import
+import { getTransactionByBookingId, getLatestTransactionByUserId  } from "../controllers/Transaction.js";
+
+import {
+  getTotalTransactions,
+  getTotalUsers,
+  getTotalRevenue,
+  getActivePackageTours,
+  getRecentBookings,
+} from "../controllers/Dashboard.js";
+
+
 
 
 
@@ -36,7 +47,27 @@ router.post("/midtrans-notification", paymentNotification);
 router.get("/transaction/:order_id", getTransactionDetail); // ✅ Route untuk ambil detail transaksi
 
 
+router.get("/getAllBookings", getAllBookings)
 
+router.put("/admin/updateBookingStatus/:id", updateBookingStatusByAdmin);
+
+router.get("/transaction/booking/:id_booking", getTransactionByBookingId);
+
+router.get("/booking/:id_booking", getBookingById);
+
+router.get("/transaction/user/:userId", getLatestTransactionByUserId);
+
+
+router.get("/transactions/total", getTotalTransactions);
+router.get("/users/total", getTotalUsers);
+router.get("/revenue/total", getTotalRevenue);
+router.get("/packages/active", getActivePackageTours);
+router.get("/bookings/recent", getRecentBookings);
+
+
+
+
+router.get("/getAllTransactions",  getAllTransactions);
 
 // Get paket-tour
 router.get("/get-packages", getAllPackageTours)

@@ -56,9 +56,12 @@ const Transaction = db.define(
     },
     payment_method: {
       type: DataTypes.STRING,
-      allowNull: true, 
+      allowNull: true,
     },
-
+    payment_numbers: {
+      type: DataTypes.INTEGER, // ✅ Tambahkan jumlah peserta
+      allowNull: true,
+    },
     num_participants: {
       type: DataTypes.INTEGER, // ✅ Tambahkan jumlah peserta
       allowNull: false,
