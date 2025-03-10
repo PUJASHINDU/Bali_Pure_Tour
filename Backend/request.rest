@@ -239,8 +239,9 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:5000/getUserBooking
+GET http://localhost:5000/bookings/recent
 Content-Type: application/json
+
 
 ### Update User Info (with Authorization Header)
 POST http://localhost:5000/booking-tour
