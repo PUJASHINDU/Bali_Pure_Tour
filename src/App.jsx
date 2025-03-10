@@ -32,6 +32,7 @@ import FromTambahPaketTour from './Admin/pages/FromTambahPaketTour';
 import FormTambahCardPaketTour from './Admin/pages/FormTambahCardPaketTourpage';
 import ManajemenPackageTour from './Admin/pages/ManajemenPaketTourpage';
 import PaymentSuccessPage from "./Admin/pages/PaymentSuccessPage";
+import FormDetailPesananPage from "./Admin/pages/FormDetailPesananpage"; // Sesuaikan path import
 
 
 const App = () => {
@@ -59,13 +60,14 @@ const App = () => {
     <Route path="/AdminDashboardpage" element={<AdminDashboardpage/>} />
     {/* <Route path="/FormUpdateCardPaketpage" element={<FormUpdateCardPaketpage/>} /> */}
     <Route path="/FormUpdatePaketTourpage" element={<FormUpdatePaketTourpage/>} />
-    <Route path="/FormDetailPesananpage" element={<FormDetailPesananpage/>} />
+    <Route path="/FormDetailPesananpage/:id_booking" element={<FormDetailPesananPage />} />
     <Route path="/AllPackgeTourPage" element={<AllPackgeTourPage/>} />
     <Route path="/FromBookingpage" element={<FromBookingpage/>} />
     <Route path="/Servicepage" element={<Servicepage/>} />
     <Route path="/Booking" element={<Booking />} />
     <Route path="/Avatarpage" element={<Avatarpage />} />
     <Route path="/payment-success/:order_id" element={<PaymentSuccessPage />} />
+    
     </Routes>
     </div>
   )
