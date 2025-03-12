@@ -27,6 +27,11 @@ const User = db.define(
     photo_profile: {
       type: DataTypes.STRING, // URL atau path foto profil
     },
+    role: {
+      type: DataTypes.ENUM("admin", "user"), // Bisa ditambah sesuai kebutuhan
+      allowNull: false,
+      defaultValue: "user", // Default adalah user biasa
+    },
     refresh_token: {
       type: DataTypes.TEXT,
     },
