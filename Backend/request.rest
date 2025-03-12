@@ -57,13 +57,27 @@ Content-Type: application/json
 
 # Admin api start
 ###
+POST http://localhost:5000/register-admin
+Content-Type: application/json
+
+{
+  "email": "AdminPTbalipure@gmail.com",
+  "password": "Adminptbalipure"
+}
+
+###
 POST http://localhost:5000/admin
 Content-Type: application/json
 
 {
-  "user_name": "Admin",
-  "password": "Admin12345"
+  "email": "AdminPTbalipure@gmail.com",
+  "password": "Adminptbalipure"
 }
+
+### Update User Info (with Authorization Header)
+GET http://localhost:5000/get-admin
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjo1LCJlbWFpbCI6IkFkbWluUFRiYWxpcHVyZUBnbWFpbC5jb20iLCJpYXQiOjE3NDE2ODM4NTgsImV4cCI6MTc0MTY4NzQ1OH0.dYLw6yW5C-hQwF85y_NZtmEQRMGpC0WeG610oQAF82w
 
 # Admin api end
 
