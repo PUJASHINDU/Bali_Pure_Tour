@@ -13,7 +13,7 @@ const Admin = db.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    user_name: {
+    email: {
       type: DataTypes.STRING,
     },
     password: {
