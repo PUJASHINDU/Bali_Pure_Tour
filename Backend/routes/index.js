@@ -1,8 +1,9 @@
 import express from "express";
 import upload from "../middleware/upload.js";
 import { getUser, Register, Login, Logout, UpdateUser } from "../controllers/User.js";
-import { LoginAdmin } from "../controllers/Admin.js";
+import { LoginAdmin, RegisterAdmin, getAdminProfile} from "../controllers/Admin.js";
 import { verifyToken } from "../middleware/verifyToken.js";
+import { verifyadmin } from "../middleware/verifyadmin.js";
 import { refreshToken } from "../controllers/RefreshToken.js";
 import { createPackageTourWithGaleries, updatePackageTourWithGaleriesAndRundown, getTourById, getTourGallery, getTourRundown, getAllPackageTours } from "../controllers/PackageTour.js";
 import { createCardDestination, updateCardDestination, deleteCardDestinationWithPackageTour, getCardDestinationById  } from "../controllers/CardDestination.js";
@@ -13,6 +14,8 @@ import { createBooking , getUserBookings, getAllBookings, updateBookingStatusByA
 import { createPayment, paymentNotification,  getTransactionDetail, getAllTransactions } from "../controllers/Payment.js";
 import { authenticateUser } from "../middleware/authenticateUser.js"; // Pastikan import
 import { getTransactionByBookingId, getLatestTransactionByUserId  } from "../controllers/Transaction.js";
+import { authRole } from "../middleware/authRole.js";
+
 
 import {
   getTotalTransactions,
@@ -36,10 +39,12 @@ const router = express.Router();
 // router.get("/token", refreshToken);
 //Admin
 router.post("/admin", LoginAdmin);
+router.post('/register-admin', RegisterAdmin); // Register admin
+router.get("/get-admin", verifyadmin, getAdminProfile); // ✅ Gunakan verifyadmin
 
 router.post('/booking-tour', verifyToken, createBooking, async (req, res) => {
   console.log("Token diterima:", req.headers.authorization);
-  console.log("Payload booking:", req.body);
+  console.log("Payload booking:", req.body);2
 });
 router.get("/getUserBooking", verifyToken, getUserBookings);
 router.post("/create-payment", createPayment);
@@ -115,5 +120,13 @@ router.post('/login', Login);
 router.put('/update', verifyToken, UpdateUser);
 router.delete('/logout', Logout);
 router.get('/token', refreshToken);
+// Akses hanya untuk Admin
+router.get("/admin", authRole(["admin"]), (req, res) => {
+  res.json({ msg: "Halo Admin!" });
+});
 
+// Akses hanya untuk User
+router.get("/user", authRole(["user"]), (req, res) => {
+  res.json({ msg: "Halo User!" });
+});
 export default router
