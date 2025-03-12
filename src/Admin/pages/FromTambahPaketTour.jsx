@@ -1,5 +1,5 @@
 import FromTambahPaketTour from '../components/FromTambahPaketTour';
-import NavbarComponent from '../../components/NavbarComponent';
+import NavbarComponent from '../components/NavbarAdminComponent';
 import FooterComponents from '../../components/FooterComponents';
 
 const TambahPaketTourPage = () => { // Ganti nama fungsi lokal

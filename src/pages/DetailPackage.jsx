@@ -93,7 +93,7 @@ const DetailPackage = () => {
         <p className="text-center text-red-500">{error}</p>
       ) : (
         <>
-          <motion.div initial="hidden" animate="visible" variants={riseVariants} transition={{ delay: 0.2 }}>
+          <motion.div initial="hidden" animate="visible" variants={riseVariants} transition={{ delay: 0.2 }}> 
             {galleryImages.length > 0 ? (
               <GallaryPackgeTour images={galleryImages} />
             ) : (

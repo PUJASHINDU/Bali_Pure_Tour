@@ -5,7 +5,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
-  const [loading, setLoading] = useState(true); // Hindari flash logout saat refresh
+  const [adminData, setAdminData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // 🔄 Fungsi refresh token otomatis
   const refreshAccessToken = async () => {
@@ -14,19 +15,15 @@ export const AuthProvider = ({ children }) => {
 
       const response = await fetch("http://localhost:5000/token", {
         method: "GET",
-        credentials: "include", // Pastikan cookie dikirim
+        credentials: "include",
       });
 
-      console.log("🛠 Status Response:", response.status);
-
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error("🚨 Error response dari server:", errorData);
         throw new Error("Failed to refresh token");
       }
 
       const data = await response.json();
-      console.log("✅ Token berhasil diperbarui:", data.accessToken);
+      console.log("✅ Token diperbarui:", data.accessToken);
       setToken(data.accessToken);
       localStorage.setItem("token", data.accessToken);
 
@@ -40,7 +37,6 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   };
-
 
   // 👤 Ambil data user dengan auto-refresh token jika expired
   const fetchUserData = async (accessToken) => {
@@ -57,9 +53,8 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 403) {
         console.warn("⚠️ Token expired, mencoba refresh...");
         currentToken = await refreshAccessToken();
-        if (!currentToken) return null; // Gagal refresh token
+        if (!currentToken) return null;
 
-        // Coba lagi fetch user data
         const retryResponse = await fetch("http://localhost:5000/user", {
           method: "GET",
           headers: {
@@ -85,8 +80,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔄 Fungsi untuk update profile user
-  const UpdateUser = async (profileData) => {
+  // 🔄 Ambil data admin
+  const fetchAdminData = async () => {
+    try {
+      if (!token) {
+        console.warn("⚠️ Token tidak tersedia, mencoba refresh...");
+        const newToken = await refreshAccessToken();
+        if (!newToken) return;
+      }
+
+      const response = await fetch("http://localhost:5000/get-admin", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengambil data admin");
+      }
+
+      const data = await response.json();
+      setAdminData(data);
+      console.log("✅ Data admin berhasil diambil:", data);
+    } catch (error) {
+      console.error("❌ Gagal mengambil data admin:", error);
+    }
+  };
+
+  // 🔄 Fungsi untuk update profil user
+  const updateUser = async (profileData) => {
     try {
       let currentToken = token;
 
@@ -114,20 +138,19 @@ export const AuthProvider = ({ children }) => {
       setToken(data.accessToken);
       localStorage.setItem("token", data.accessToken);
 
-      // Ambil ulang data user setelah update
       const userData = await fetchUserData(data.accessToken);
       if (userData) {
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
       }
 
-      console.log("✅ Profile updated successfully!");
+      console.log("✅ Profil berhasil diperbarui!");
     } catch (error) {
       console.error("❌ Gagal update profile:", error);
     }
   };
 
-  // 🔑 Login: Simpan token & user data
+  // 🔑 Login: Simpan token, user data, dan role
   const login = (tokenData, userData) => {
     setToken(tokenData);
     setUser(userData);
@@ -136,16 +159,16 @@ export const AuthProvider = ({ children }) => {
     console.log("✅ Login berhasil:", userData);
   };
 
-  // 🚪 Logout: Hapus token & user data
+  // 🚪 Logout: Hapus token, user data, dan role
   const logout = () => {
     setToken(null);
     setUser(null);
+    setAdminData(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     console.log("🚪 User logged out");
   };
 
-  // Saat halaman dimuat, coba refresh token jika ada
   useEffect(() => {
     const checkLoginStatus = async () => {
       if (token) {
@@ -160,10 +183,16 @@ export const AuthProvider = ({ children }) => {
     checkLoginStatus();
   }, []);
 
-  if (loading) return <p>Loading...</p>; // Hindari flash logout saat refresh
+  useEffect(() => {
+    if (token) {
+      fetchAdminData();
+    }
+  }, [token]);
+
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <AuthContext.Provider value={{ token, user, setToken, setUser, login, logout, UpdateUser, refreshAccessToken}}>
+    <AuthContext.Provider value={{ token, user, adminData, login, logout, updateUser, refreshAccessToken, fetchAdminData }}>
       {children}
     </AuthContext.Provider>
   );

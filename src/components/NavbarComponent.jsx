@@ -48,11 +48,11 @@ const NavbarComponent = () => {
         Booking Tour
       </Link>
       </Typography>
-      <Typography as="li" variant="small" className="p-1 font-poppins font-medium text-base">
+      {/* <Typography as="li" variant="small" className="p-1 font-poppins font-medium text-base">
         <Link to="/AdminDashboardpage" className="flex items-center">
           Contact
         </Link>
-      </Typography>
+      </Typography> */}
     </ul>
   );
 

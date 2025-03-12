@@ -110,7 +110,7 @@ const CardPackageTour = () => {
             id: item.id_package, // Tambahkan ID untuk routing
             imageUrl: matchedImage ? matchedImage.img : "https://via.placeholder.com/400",
             title: { first: "", second: item.card_name.toUpperCase() },
-            description: item.about_card,
+            description: item.about_card, 
             location: "Place Penempahan Manukaya",
             Note: item.note_card,
             price: `${item.price}`,
