@@ -1,5 +1,5 @@
 import AddCardPaketTour from '../components/FormTambahCardPaketTour';
-import NavbarComponent from '../../components/NavbarComponent';
+import NavbarComponent from '../components/NavbarAdminComponent';
 import FooterComponents from '../../components/FooterComponents';
 
 const TambahCardPaketTourPage = () => { // Ganti nama fungsi lokal

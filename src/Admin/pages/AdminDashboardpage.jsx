@@ -1,5 +1,5 @@
 import React from 'react'
-import NavbarComponent from '../../components/NavbarComponent'
+import NavbarComponent from '../components/NavbarAdminComponent'
 import AdminDashboard from '../components/AdminDashboard'
 const AdminDashboardpage = () => {
   return (

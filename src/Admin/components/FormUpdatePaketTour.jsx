@@ -157,8 +157,8 @@ const FormUpdatePaketTour = () => {
       setShowModal(true); // Tampilkan modal setelah berhasil update
       setTimeout(() => {
         setShowModal(false);
-        navigate(`/ManajemenPackageTour`);
-      }, 3000); // ⏳ Modal tampil 3 detik sebelum redirect
+        navigate(`/AdminDashboardpage`);
+      }, 2000); // ⏳ Modal tampil 3 detik sebelum redirect
     } catch (error) {
       setShowErrorModal(true);
     }

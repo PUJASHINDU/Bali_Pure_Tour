@@ -1,6 +1,6 @@
 import React from 'react'
 import FormUpdateCardPaket from '../components/FormUpdateCardPaket'
-import NavbarComponent from '../../components/NavbarComponent'
+import NavbarComponent from '../components/NavbarAdminComponent'
 import FooterComponents from '../../components/FooterComponents';
 
 // Data untuk DeskripsiDestinasiComponents

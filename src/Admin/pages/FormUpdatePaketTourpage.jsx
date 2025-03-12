@@ -1,7 +1,7 @@
 import React from 'react';
 
 import FormUpdatePaketTour from '../components/FormUpdatePaketTour'; // Pastikan path ini sesuai dengan struktur folder Anda
-import NavbarComponent from '../../components/NavbarComponent'
+import NavbarComponent from '../components/NavbarAdminComponent'
 import FooterComponents from '../../components/FooterComponents';
 
 

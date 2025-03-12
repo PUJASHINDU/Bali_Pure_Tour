@@ -1,5 +1,5 @@
 import ManajemenPackageTour from '../components/ManajemenPaketTourComponents'
-import NavbarComponent from '../../components/NavbarComponent';
+import NavbarComponent from '../components/NavbarAdminComponent';
 import FooterComponents from '../../components/FooterComponents';
 
 const ManajemenPaketTour = () => { // Ganti nama fungsi lokal

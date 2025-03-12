@@ -165,7 +165,7 @@ const CardPackageTour = () => {
           Note: item.note_card,
           price: `${item.price}`,
           tooltips: ["Maximal 6 Person", "2 Guide", "View Details"],
-          detailPage: `/Detail${item.card_name.replace(/\s/g, '')}`
+          detailPage: `/detailadmin/${item.id_package}` // Buat link dinamis
         };
       });
 
