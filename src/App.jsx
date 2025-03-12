@@ -20,6 +20,7 @@ import Avatarpage from './pages/Aavatarpage';
 import DetailPackage from "./pages/DetailPackage"; // Import DetailPackage
 import FormUpdatePaketTourPage from "./Admin/pages/FormUpdatePaketTourpage"; // Pastikan ini sesuai dengan lokasi file update
 import FormUpdateCardPaket from "./Admin/pages/FormUpdateCardPaketpage"; // Sesuaikan dengan lokasi file
+import DetailPackageAdmin from './Admin/pages/DetailPackageAdmin';
 
 
 
@@ -33,6 +34,7 @@ import FormTambahCardPaketTour from './Admin/pages/FormTambahCardPaketTourpage';
 import ManajemenPackageTour from './Admin/pages/ManajemenPaketTourpage';
 import PaymentSuccessPage from "./Admin/pages/PaymentSuccessPage";
 import FormDetailPesananPage from "./Admin/pages/FormDetailPesananpage"; // Sesuaikan path import
+import AcountAdminpage from './Admin/pages/AcountAdminpage';
 
 
 const App = () => {
@@ -40,6 +42,8 @@ const App = () => {
     <div>
     <Routes>
     <Route path="/detail/:id" element={<DetailPackage />} />
+    <Route path="/detailadmin/:id" element={<DetailPackageAdmin />} />
+
     <Route path="/FormUpdatePaketTourpage/:id" element={<FormUpdatePaketTourPage />} />
     <Route path="/FormUpdateCardPaketpage/:id" element={<FormUpdateCardPaket />} />
     <Route path="/FromTambahPaketTour" element={<FromTambahPaketTour/>} />
@@ -67,7 +71,8 @@ const App = () => {
     <Route path="/Booking" element={<Booking />} />
     <Route path="/Avatarpage" element={<Avatarpage />} />
     <Route path="/payment-success/:order_id" element={<PaymentSuccessPage />} />
-    
+    <Route path="/AcountAdminpage" element={<AcountAdminpage />} />
+
     </Routes>
     </div>
   )
